@@ -20,16 +20,13 @@
 			"platform": "android",
 			"enableDebug": false
 		},
-		
-
-
 		{
 			"name": "Debug Android",
 			"cwd": "${workspaceFolder}",
 			"type": "reactnative",
 			"request": "launch",
-			"platform": "android"
+			"platform": "android",
+			"enableDebug": true
 		}
-
 	]
 }

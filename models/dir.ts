@@ -5,8 +5,6 @@ class Dir {
 		public size: number,
 		public isDirectory: boolean,
 		public isFile: boolean,
-		public subDirs?: Dir[],
-		public parentIndexes?: number[],
 	) {}
 }
 

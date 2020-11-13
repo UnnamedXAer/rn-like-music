@@ -5,6 +5,7 @@ import TrackPlayer, { TrackType } from 'react-native-track-player';
 import RenderItem from '../components/DirTree/dirTreeRenderItem';
 import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
+import { View as ThemedView } from '../components/UI/Themed';
 import { StateError } from '../types/reactTypes';
 import { readStorage } from '../utils/storage/readStorage';
 
@@ -75,7 +76,7 @@ export default function Directories() {
 	};
 
 	return (
-		<View>
+		<ThemedView>
 			<Text>directories len: {directories?.length}</Text>
 			{error && <Text>{error}</Text>}
 			{loading && !refreshing && <ActivityIndicator />}
@@ -100,7 +101,7 @@ export default function Directories() {
 					/>
 				)}
 			/>
-		</View>
+		</ThemedView>
 	);
 }
 

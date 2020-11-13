@@ -5,7 +5,6 @@ import {
 	Text,
 	ScrollView,
 	ActivityIndicator,
-	Button,
 	StyleSheet,
 	TouchableOpacity,
 } from 'react-native';
@@ -16,7 +15,9 @@ import TrackPlayer, {
 	useTrackPlayerEvents,
 } from 'react-native-track-player';
 import TrackPlayerProgress from '../components/TrackPlayerProgress/TrackPlayerProgress';
+import Button from '../components/UI/Button';
 import { RootStackParamList } from '../navigation/types/RootStack';
+import { View as ThemedView } from '../components/UI/Themed';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -72,7 +73,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	// };
 
 	return (
-		<View style={styles.container}>
+		<ThemedView style={styles.container}>
 			<Text>{new Date().toLocaleString('en-US')}</Text>
 			<Button
 				onPress={() => navigation.navigate('Directories')}
@@ -100,7 +101,6 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 				/>
 			</View>
 			<ScrollView
-				// eslint-disable-next-line react-native/no-inline-styles
 				style={{
 					backgroundColor: '#eee',
 				}}>
@@ -129,7 +129,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					<ActivityIndicator />
 				)}
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 };
 

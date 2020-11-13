@@ -32,7 +32,7 @@ export default function RenderItem({ item, onDirPress, subDirectories }: Props) 
 			{isExpanded && subDirectories[item.path] && (
 				<FlatList
 					data={subDirectories[item.path]}
-					keyExtractor={(_item, i) => '' + i}
+					keyExtractor={(_item) => _item.path}
 					renderItem={({ item: subItem }) => {
 						return (
 							<RenderItem

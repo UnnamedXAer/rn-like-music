@@ -26,7 +26,6 @@
 			"type": "reactnative",
 			"request": "launch",
 			"platform": "android",
-			"enableDebug": true
 		}
 	]
 }

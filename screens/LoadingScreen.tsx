@@ -6,7 +6,6 @@ export default function LoadingScreen() {
 		<>
 			<StatusBar />
 			<SafeAreaView
-				// eslint-disable-next-line react-native/no-inline-styles
 				style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 				<ActivityIndicator />
 			</SafeAreaView>

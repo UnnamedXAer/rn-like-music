@@ -1,23 +1,21 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import {
 	View,
-	Text,
 	ScrollView,
 	ActivityIndicator,
 	StyleSheet,
 	TouchableOpacity,
+	Alert,
 } from 'react-native';
-import TrackPlayer, {
-	Event,
-	State,
-	Track,
-	useTrackPlayerEvents,
-} from 'react-native-track-player';
+import TrackPlayer, { Track } from 'react-native-track-player';
 import TrackPlayerProgress from '../components/TrackPlayerProgress/TrackPlayerProgress';
 import Button from '../components/UI/Button';
 import { RootStackParamList } from '../navigation/types/RootStack';
-import { View as ThemedView } from '../components/UI/Themed';
+import { View as ThemedView, Text } from '../components/UI/Themed';
+import useIsPlaying from '../hooks/useIsPlaying';
+import { TracksActionTypes, TracksContext } from '../context/tracksContext';
+import Layout from '../constants/Layout';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -26,51 +24,30 @@ interface Props {
 }
 
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [queue, setQueue] = useState<Track[]>([]);
-
-	console.log('queue', queue);
-
-	useTrackPlayerEvents([Event.PlaybackState], (ev) => {
-		console.log('ev.state', ev);
-		if (ev.state === State.Playing) {
-			setIsPlaying(true);
-		} else {
-			setIsPlaying(false);
-		}
-	});
+	const isPlaying = useIsPlaying();
+	const { tracksState, dispatchTracks } = useContext(TracksContext);
 
 	const mainButtonPressHandler = () => {
 		if (!isPlaying) {
 			TrackPlayer.play();
-			//setIsPlaying(true);
 		} else {
 			TrackPlayer.pause();
-			//setIsPlaying(false);
 		}
 	};
 
 	const queueItemPressHandler = async (track: Track) => {
-		console.log('track', track);
+		if (track.id === tracksState.currentTruck?.id) {
+			return;
+		}
 		try {
-			console.log('skipping to:', track.title);
 			await TrackPlayer.skip(track.id);
-			await TrackPlayer.play();
-			console.log('track playing', track.title);
+			// await TrackPlayer.play();
+			dispatchTracks({ type: TracksActionTypes.SetCurrentTrack, payload: track });
 		} catch (err) {
-			console.log('sound player err', err);
+			Alert.alert('', "Sorry couldn't play the song.");
+			console.log('queueItemPressHandler err', err);
 		}
 	};
-
-	// const readSongImg = async (path: string) => {
-	// try {
-	// 	const data = await readStorageFile(dir.path);
-	// 	console.log('data', data.substr(0, 50));
-	// 	// setCurrenFile(data);
-	// } catch (err) {
-	// 	setError(err.message);
-	// }
-	// };
 
 	return (
 		<ThemedView style={styles.container}>
@@ -84,46 +61,71 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 				title={isPlaying ? 'Pause' : 'Play'}
 			/>
 			<View style={styles.soundPlayerWrapper}>
+				<Text>
+					{tracksState.currentTruck ? tracksState.currentTruck.title : '-'}
+				</Text>
 				<TrackPlayerProgress />
 			</View>
 			<View>
 				<Button
 					title="show queue"
 					onPress={() =>
-						TrackPlayer.getQueue().then((_queue) => setQueue(_queue))
+						TrackPlayer.getQueue().then((_queue) => {
+							dispatchTracks({
+								type: TracksActionTypes.SetQueue,
+								payload: _queue,
+							});
+						})
 					}
 				/>
 				<Button
 					title="Reset queue"
 					onPress={() =>
-						TrackPlayer.reset().then((res) => console.log('reset', res))
+						TrackPlayer.reset().then(() =>
+							dispatchTracks({
+								type: TracksActionTypes.ResetQueue,
+							}),
+						)
 					}
 				/>
 			</View>
-			<ScrollView
-				style={{
-					backgroundColor: '#eee',
-				}}>
+			<ScrollView>
 				{true /*isPlayerInitialized*/ ? (
 					<>
-						<Text>Tracks in queue: {queue.length}</Text>
-						{queue.map((track) => (
-							<TouchableOpacity
-								key={track.id}
-								onPress={() => queueItemPressHandler(track)}>
-								<View
-									style={[
-										{
-											flexDirection: 'column',
-											margin: 4,
-											borderWidth: 1,
-										},
-									]}>
-									<Text style={{ fontSize: 12 }}>{track.title}</Text>
-									<Text style={{ fontSize: 8 }}>{track.duration}</Text>
-								</View>
-							</TouchableOpacity>
-						))}
+						<Text>Tracks in queue: {tracksState.queue.length}</Text>
+						{tracksState.queue.map((track) => {
+							return (
+								<TouchableOpacity
+									key={track.id}
+									onPress={() => queueItemPressHandler(track)}>
+									<View
+										style={[
+											{
+												flexDirection: 'column',
+												margin: 4,
+												borderWidth: 1,
+											},
+										]}>
+										<Text
+											style={[
+												{
+													fontSize: 12,
+												},
+												track.id === tracksState.currentTruck?.id
+													? {
+															color: 'yellow',
+													  }
+													: {},
+											]}>
+											{track.title}
+										</Text>
+										<Text style={{ fontSize: 8 }}>
+											{track.duration}
+										</Text>
+									</View>
+								</TouchableOpacity>
+							);
+						})}
 					</>
 				) : (
 					<ActivityIndicator />
@@ -136,17 +138,17 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: 'red',
 	},
 	soundPlayerWrapper: {
-		marginVertical: 16,
-		marginHorizontal: 16,
+		marginVertical: Layout.spacing(2),
+		marginHorizontal: Layout.spacing(2),
+		paddingHorizontal: Layout.spacing(2),
 		borderColor: 'lightblue',
 		borderWidth: 1,
 		borderStyle: 'dashed',
 	},
 	flatListTitle: {
-		fontSize: 24,
+		fontSize: Layout.spacing(3),
 		fontWeight: 'bold',
 		textAlign: 'center',
 	},

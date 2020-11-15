@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import Dir from '../../models/dir';
+import { Text } from '../UI/Themed';
 
 interface Props {
 	item: Dir;
 	onDirPress: (dir: Dir) => Promise<void>;
-	subDirectories: { [key: string]: Dir[] };
+	subDirectories: { [path: string]: Dir[] };
+	selectedFiles: { [path: string]: Dir };
 }
 
-export default function RenderItem({ item, onDirPress, subDirectories }: Props) {
+export default function RenderItem({
+	item,
+	onDirPress,
+	subDirectories,
+	selectedFiles,
+}: Props) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	return (
@@ -21,12 +28,15 @@ export default function RenderItem({ item, onDirPress, subDirectories }: Props) 
 					}
 				}}>
 				<Text>
-					{item.isDirectory ? (isExpanded ? '-' : '+') : '|>'}{' '}
 					{item.isDirectory
-						? `dir: ${item.name}`
-						: item.isFile
-						? `file: ${item.path}`
-						: `unknown type: ${item.path}`}
+						? isExpanded
+							? '-'
+							: '+'
+						: selectedFiles[item.path]
+						? '[v]'
+						: '[ ]'}{' '}
+					{item.isDirectory ? 'dir:' : item.isFile ? 'file:' : 'unknown type:'}{' '}
+					{item.name}
 				</Text>
 			</TouchableOpacity>
 			{isExpanded && subDirectories[item.path] && (
@@ -39,6 +49,7 @@ export default function RenderItem({ item, onDirPress, subDirectories }: Props) 
 								item={subItem}
 								onDirPress={onDirPress}
 								subDirectories={subDirectories}
+								selectedFiles={selectedFiles}
 							/>
 						);
 					}}

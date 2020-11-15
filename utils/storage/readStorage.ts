@@ -3,7 +3,6 @@ import Dir from '../../models/dir';
 
 const loopThroughDirs = async (path: string) => {
 	const dirs = await RNFS.readDir(path);
-	console.log(path, 'dirs', dirs);
 	if (dirs) {
 		const elements: Dir[] = [];
 		for (let i = dirs.length - 1; i >= 0; i--) {
@@ -31,7 +30,6 @@ const loopThroughDirs = async (path: string) => {
 
 const readFile = async (path: string) => {
 	const results = await RNFS.readFile('file://' + path, 'base64');
-	console.log(path, 'results', results);
 	if (results) {
 		return results;
 		// const elements: Dir[] = [];

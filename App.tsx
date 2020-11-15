@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
+import TracksProvider from './context/tracksContext';
 
 import useStoragePermission from './hooks/useStoragePermission';
 import Navigator from './navigation';
@@ -11,7 +12,7 @@ import { trackPlayerInit } from './trackPlayer/playerInit';
 const App = () => {
 	const [isPlayerInitialized, setIsPlayerInitialized] = useState(false);
 	const isStoragePermissionGranted = useStoragePermission();
-	console.log('isStoragePermissionGranted', isStoragePermissionGranted);
+
 	useEffect(() => {
 		(async () => {
 			await trackPlayerInit();
@@ -27,7 +28,11 @@ const App = () => {
 		return <ActivityIndicator />;
 	}
 
-	return <Navigator />;
+	return (
+		<TracksProvider>
+			<Navigator />
+		</TracksProvider>
+	);
 };
 
 export default App;

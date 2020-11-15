@@ -1,10 +1,16 @@
 import { Dimensions } from 'react-native';
-import { DeviceSize } from '../Types/types';
+import { DeviceSize } from '../../types/types';
 
 export default function getDeviceSize(): DeviceSize {
 	const width = Dimensions.get('window').width;
-	if (width < 340) return 'small';
-	if (width < 440) return 'medium';
-	if (width < 660) return 'large';
+	if (width < 340) {
+		return 'small';
+	}
+	if (width < 440) {
+		return 'medium';
+	}
+	if (width < 660) {
+		return 'large';
+	}
 	return 'tablet';
 }

@@ -1,21 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import RNFS from 'react-native-fs';
-import TrackPlayer, { TrackType } from 'react-native-track-player';
+import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
 import RenderItem from '../components/DirTree/dirTreeRenderItem';
 import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
-import { View as ThemedView } from '../components/UI/Themed';
+import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
 import { StateError } from '../types/reactTypes';
 import { readStorage } from '../utils/storage/readStorage';
+import Button from '../components/UI/Button';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/types/RootStack';
+import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 
-export default function Directories() {
+type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
+
+interface Props {
+	navigation: ScreenNavigationProp;
+}
+
+const Directories: React.FC<Props> = ({ navigation }) => {
 	const [error, setError] = useState<StateError>(null);
 	const [directories, setDirectories] = useState<Dir[] | null>(null);
-	const [subDirectories, setSubDirectories] = useState<{ [key: string]: Dir[] }>({});
+	const [subDirectories, setSubDirectories] = useState<{ [path: string]: Dir[] }>({});
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const isStoragePermissionGranted = useStoragePermission();
+	const [selectedFiles, setSelectedFiles] = useState<{
+		[path: string]: Dir;
+	}>({});
+	const { dispatchTracks } = useContext(TracksContext);
+
+	useEffect(() => {
+		if (!directories && !error && !loading && !refreshing) {
+			loadDirectories();
+		}
+	}, [directories, error, loading, refreshing]);
 
 	useEffect(() => {
 		if (refreshing && !loading && isStoragePermissionGranted) {
@@ -42,9 +62,9 @@ export default function Directories() {
 		try {
 			const dirs = await readStorage(RNFS.ExternalStorageDirectoryPath);
 
-			console.log('dirs', dirs);
 			setDirectories(dirs);
 		} catch (err) {
+			console.log('readStorage Err', err);
 			setError(err.message);
 		} finally {
 			setRefreshing(false);
@@ -52,15 +72,15 @@ export default function Directories() {
 		}
 	};
 
-	const addSong = async (dir: Dir) => {
-		// await readStorage();
+	const toggleSelectSong = async (dir: Dir) => {
 		if (dir.path.endsWith('.mp3')) {
-			await TrackPlayer.add({
-				url: 'file://' + dir.path,
-				title: dir.name,
-				id: dir.name,
-				type: TrackType.Default,
-				artist: 'artist: ' + dir.name,
+			setSelectedFiles((prevState) => {
+				if (prevState[dir.path]) {
+					const updatedState = { ...prevState };
+					delete updatedState[dir.path];
+					return updatedState;
+				}
+				return { ...prevState, [dir.path]: dir };
 			});
 		} else {
 			Alert.alert('Alert', dir.name + ' is not a mp3 file.');
@@ -69,22 +89,46 @@ export default function Directories() {
 
 	const directoryItemPressHandler = async (parentDir: Dir) => {
 		if (parentDir.isFile) {
-			await addSong(parentDir);
+			await toggleSelectSong(parentDir);
 		} else if (parentDir.isDirectory) {
 			readDirectory(parentDir);
 		}
 	};
 
+	const updateQueueHandler = async () => {
+		const tracks: Track[] = [];
+
+		for (const path in selectedFiles) {
+			const dir = selectedFiles[path];
+			const track: Track = {
+				url: 'file://' + dir.path,
+				title: dir.name,
+				id: dir.path,
+				type: TrackType.Default,
+				artist: 'artist: ' + dir.name,
+			};
+			tracks.push(track);
+		}
+		await TrackPlayer.add(tracks);
+		dispatchTracks({ type: TracksActionTypes.SetQueue, payload: tracks });
+		try {
+			await TrackPlayer.clearNowPlayingMetadata();
+		} catch (err) {
+			console.log('clearNowPlayingMetadata err', err);
+		}
+		navigation.navigate('Play');
+	};
+
 	return (
-		<ThemedView>
-			<Text>directories len: {directories?.length}</Text>
+		<ThemedView style={styles.container}>
 			{error && <Text>{error}</Text>}
 			{loading && !refreshing && <ActivityIndicator />}
 			<FlatList
 				data={directories}
 				ListHeaderComponent={
-					<View>
-						<Text style={styles.flatListTitle}>Music</Text>
+					<View style={styles.headerContainer}>
+						<ThemedText style={styles.flatListTitle}>Music</ThemedText>
+						<Button onPress={updateQueueHandler} title="Ok" size={'small'} />
 					</View>
 				}
 				onRefresh={() => {
@@ -98,15 +142,21 @@ export default function Directories() {
 						item={item}
 						onDirPress={directoryItemPressHandler}
 						subDirectories={subDirectories}
+						selectedFiles={selectedFiles}
 					/>
 				)}
 			/>
 		</ThemedView>
 	);
-}
+};
 
 const styles = StyleSheet.create({
-	container: {},
+	container: { flex: 1 },
+	headerContainer: {
+		flexDirection: 'row',
+		justifyContent: 'space-around',
+		alignItems: 'center',
+	},
 	soundPlayerWrapper: {
 		marginVertical: 16,
 		marginHorizontal: 16,
@@ -120,3 +170,5 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 });
+
+export default Directories;

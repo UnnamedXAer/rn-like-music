@@ -26,12 +26,12 @@ type AppColors = { [key in ColorSchemeName]: ThemeColors } & { colors: typeof _c
 
 const Colors: AppColors = {
 	light: {
-		text: _colors.darker,
+		text: _colors.dark,
 		background: _colors.lighter,
 		tint: tintColorLight,
 	},
 	dark: {
-		text: _colors.lighter,
+		text: _colors.light,
 		background: _colors.darker,
 		tint: tintColorDark,
 	},

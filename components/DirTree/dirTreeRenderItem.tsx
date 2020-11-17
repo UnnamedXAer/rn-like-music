@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Layout from '../../constants/Layout';
 import Dir from '../../models/dir';
 import { Text } from '../UI/Themed';
 
@@ -8,6 +10,7 @@ interface Props {
 	onDirPress: (dir: Dir) => Promise<void>;
 	subDirectories: { [path: string]: Dir[] };
 	selectedFiles: { [path: string]: Dir };
+	color: string;
 }
 
 export default function RenderItem({
@@ -15,8 +18,22 @@ export default function RenderItem({
 	onDirPress,
 	subDirectories,
 	selectedFiles,
+	color,
 }: Props) {
 	const [isExpanded, setIsExpanded] = useState(false);
+
+	let iconName = 'file';
+	if (item.isDirectory) {
+		if (isExpanded) {
+			iconName = 'folder-open';
+		} else {
+			iconName = 'folder';
+		}
+	} else if (item.isFile) {
+		if (/\.mp3/.test(item.name)) {
+			iconName = 'music';
+		}
+	}
 
 	return (
 		<View style={[styles.container]}>
@@ -28,13 +45,23 @@ export default function RenderItem({
 					}
 				}}>
 				<Text>
-					{item.isDirectory
-						? isExpanded
-							? '-'
-							: '+'
-						: selectedFiles[item.path]
-						? '[v]'
-						: '[ ]'}{' '}
+					<FontAwesome5 name={iconName} light size={16} />
+					{/* {item.isDirectory ? (
+						isExpanded ? (
+							'-'
+						) : (
+							<FontAwesome5
+								name="folder-open"
+								size={Layout.spacing(3)}
+								color={color}
+								light
+							/>
+						)
+					) : selectedFiles[item.path] ? (
+						'[v]'
+					) : (
+						'[ ]'
+					)}{' '} */}
 					{item.isDirectory ? 'dir:' : item.isFile ? 'file:' : 'unknown type:'}{' '}
 					{item.name}
 				</Text>
@@ -50,6 +77,7 @@ export default function RenderItem({
 								onDirPress={onDirPress}
 								subDirectories={subDirectories}
 								selectedFiles={selectedFiles}
+								color={color}
 							/>
 						);
 					}}

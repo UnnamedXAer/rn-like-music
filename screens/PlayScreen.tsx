@@ -11,7 +11,7 @@ import {
 import TrackPlayer, { Track } from 'react-native-track-player';
 import TrackPlayerProgress from '../components/TrackPlayerProgress/TrackPlayerProgress';
 import Button from '../components/UI/Button';
-import { RootStackParamList } from '../navigation/types/RootStack';
+import { RootStackParamList } from '../navigation/types/RootStackTypes';
 import { View as ThemedView, Text } from '../components/UI/Themed';
 import useIsPlaying from '../hooks/useIsPlaying';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';

@@ -10,8 +10,10 @@ import { StateError } from '../types/reactTypes';
 import { readStorage } from '../utils/storage/readStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types/RootStack';
+import { RootStackParamList } from '../navigation/types/RootStackTypes';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import useColorScheme from '../hooks/useColorScheme';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -19,7 +21,8 @@ interface Props {
 	navigation: ScreenNavigationProp;
 }
 
-const Directories: React.FC<Props> = ({ navigation }) => {
+const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
+	const colorScheme = useColorScheme();
 	const [error, setError] = useState<StateError>(null);
 	const [directories, setDirectories] = useState<Dir[] | null>(null);
 	const [subDirectories, setSubDirectories] = useState<{ [path: string]: Dir[] }>({});
@@ -143,6 +146,7 @@ const Directories: React.FC<Props> = ({ navigation }) => {
 						onDirPress={directoryItemPressHandler}
 						subDirectories={subDirectories}
 						selectedFiles={selectedFiles}
+						color={Colors[colorScheme].text}
 					/>
 				)}
 			/>
@@ -171,4 +175,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default Directories;
+export default DirectoriesFolders;

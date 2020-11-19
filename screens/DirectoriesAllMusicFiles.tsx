@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
-import RenderItem from '../components/DirTree/dirTreeRenderItem';
+import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';

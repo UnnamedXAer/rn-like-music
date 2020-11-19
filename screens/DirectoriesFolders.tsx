@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import RNFS from 'react-native-fs';
 import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
-import RenderItem from '../components/DirTree/dirTreeRenderItem';
+import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
@@ -12,8 +12,10 @@ import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types/RootStackTypes';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import useColorScheme from '../hooks/useColorScheme';
+import DirItemSeparator from '../components/DirTree/dirItemSeparator';
+import Colors from '../constants/Colors';
+import Layout from '../constants/Layout';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -32,6 +34,9 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const [selectedFiles, setSelectedFiles] = useState<{
 		[path: string]: Dir;
 	}>({});
+	const [loadingDirs, setLoadingDirs] = useState<{
+		[path: string]: boolean;
+	}>({});
 	const { dispatchTracks } = useContext(TracksContext);
 
 	useEffect(() => {
@@ -47,6 +52,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	}, [loading, refreshing, isStoragePermissionGranted]);
 
 	const readDirectory = async (dir: Dir) => {
+		setLoadingDirs((prevState) => ({ ...prevState, [dir.path]: true }));
 		try {
 			const dirs = await readStorage(dir.path);
 			setSubDirectories((prevState) => ({
@@ -56,6 +62,13 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		} catch (err) {
 			setError(err.message);
 		}
+		setLoadingDirs((prevState) => {
+			const updatedState = { ...prevState };
+			console.log('updatedState', updatedState);
+			delete updatedState[dir.path];
+			console.log('updatedState', updatedState, prevState);
+			return updatedState;
+		});
 	};
 
 	const loadDirectories = async () => {
@@ -127,6 +140,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			{error && <Text>{error}</Text>}
 			{loading && !refreshing && <ActivityIndicator />}
 			<FlatList
+				style={styles.flatList}
 				data={directories}
 				ListHeaderComponent={
 					<View style={styles.headerContainer}>
@@ -134,6 +148,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 						<Button onPress={updateQueueHandler} title="Ok" size={'small'} />
 					</View>
 				}
+				ItemSeparatorComponent={() => <DirItemSeparator />}
 				onRefresh={() => {
 					setRefreshing(true);
 				}}
@@ -141,7 +156,8 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				refreshing={refreshing}
 				bounces
 				renderItem={({ item }) => (
-					<RenderItem
+					<DirRenderItem
+						loadingDirs={loadingDirs}
 						item={item}
 						onDirPress={directoryItemPressHandler}
 						subDirectories={subDirectories}
@@ -161,12 +177,8 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		alignItems: 'center',
 	},
-	soundPlayerWrapper: {
-		marginVertical: 16,
-		marginHorizontal: 16,
-		borderColor: 'lightblue',
-		borderWidth: 1,
-		borderStyle: 'dashed',
+	flatList: {
+		paddingRight: Layout.spacing(1),
 	},
 	flatListTitle: {
 		fontSize: 24,

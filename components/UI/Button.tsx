@@ -11,13 +11,10 @@ import { Text } from './Themed';
 
 type ButtonSize = 'small' | 'medium' | 'large';
 type ButtonMode = 'outlined' | 'contained' | 'text';
-type ButtonIconComponent = 'Ionicos' | 'Feather' | 'Octicons';
 
 interface Props {
 	onPress: (...args: any) => void | Promise<void>;
 	title?: string;
-	icon?: string;
-	iconComponentName?: ButtonIconComponent;
 	disabled?: boolean;
 	loading?: boolean;
 	theme?: ColorSchemeName;
@@ -29,10 +26,8 @@ interface Props {
 export default function Button({
 	onPress,
 	title,
-	icon,
 	loading,
 	disabled,
-	iconComponentName,
 	theme,
 	mode = 'outlined',
 	size = 'medium',
@@ -42,7 +37,6 @@ export default function Button({
 	if (theme) {
 		colorScheme = theme;
 	}
-	let iconElement: JSX.Element | null = null;
 
 	const fontSize = Layout.spacing(size === 'medium' ? 3 : size === 'small' ? 2 : 4);
 
@@ -80,7 +74,7 @@ export default function Button({
 						shadowOpacity: 0.6,
 				  }
 				: {
-						elevation: 5,
+						// elevation: 5,
 				  }),
 		},
 		container: {
@@ -96,54 +90,11 @@ export default function Button({
 		},
 		icon: {},
 		text: {
-			marginLeft: Layout.spacing(),
+			marginLeft: loading ? Layout.spacing() : 0,
 			fontSize,
 			color,
 		},
 	});
-
-	if (loading) {
-		iconElement = (
-			<ActivityIndicator color={Colors[colorScheme].text} size={fontSize} />
-		);
-	}
-	// else if (icon) {
-	// 	switch (iconComponentName) {
-	// 		case undefined:
-	// 		case 'Ionicos':
-	// 			iconElement = (
-	// 				<Ionicons
-	// 					style={styles.icon}
-	// 					name={icon}
-	// 					size={fontSize + 8}
-	// 					color={color}
-	// 				/>
-	// 			);
-	// 			break;
-	// 		case 'Feather':
-	// 			iconElement = (
-	// 				<Feather
-	// 					style={styles.icon}
-	// 					name={icon}
-	// 					size={fontSize}
-	// 					color={color}
-	// 				/>
-	// 			);
-	// 			break;
-	// 		case 'Octicons':
-	// 			iconElement = (
-	// 				<Octicons
-	// 					style={styles.icon}
-	// 					name={icon}
-	// 					size={fontSize}
-	// 					color={color}
-	// 				/>
-	// 			);
-	// 			break;
-	// 		default:
-	// 			assertUnreachable(iconComponentName);
-	// 	}
-	// }
 
 	return (
 		<TouchableOpacity
@@ -152,7 +103,14 @@ export default function Button({
 			disabled={loading || disabled}
 			activeOpacity={mode === 'contained' ? 0.7 : 0.4}>
 			<View style={styles.container}>
-				{iconElement && <View style={styles.iconContainer}>{iconElement}</View>}
+				{loading && (
+					<View style={styles.iconContainer}>
+						<ActivityIndicator
+							color={Colors[colorScheme].text}
+							size={fontSize}
+						/>
+					</View>
+				)}
 				{title && (
 					<Text style={styles.text} selectable={false}>
 						{title}

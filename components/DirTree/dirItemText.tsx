@@ -8,21 +8,15 @@ import DirIcon from './dirIcon';
 interface Props {
 	item: Dir;
 	onPress: () => void;
-	isExpanded: boolean;
 	color: string;
 	loading: undefined | boolean;
 }
 
-const DirItemText: React.FC<Props> = ({ onPress, item, isExpanded, color, loading }) => {
+const DirItemText: React.FC<Props> = ({ onPress, item, color, loading }) => {
 	return (
 		<TouchableOpacity onPress={onPress} style={styles.touchable}>
 			<>
-				<DirIcon
-					dir={item}
-					isExpanded={isExpanded}
-					loading={loading}
-					color={color}
-				/>
+				<DirIcon dir={item} loading={loading} color={color} />
 				<Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
 					{item.name}
 				</Text>

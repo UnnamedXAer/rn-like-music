@@ -6,25 +6,20 @@ import Dir from '../../models/dir';
 
 interface Props {
 	dir: Dir;
-	isExpanded: boolean;
 	loading: boolean | undefined;
 	color: string;
 }
 
-const DirIcon: React.FC<Props> = ({ dir, isExpanded, loading, color }) => {
+const DirIcon: React.FC<Props> = ({ dir, loading, color }) => {
 	let iconName = 'file';
 	if (dir.isDirectory) {
-		if (isExpanded) {
-			iconName = 'folder-open';
-		} else {
-			iconName = 'folder';
-		}
+		iconName = 'folder-open';
 	} else if (dir.isFile) {
 		if (/\.mp3/.test(dir.name)) {
 			iconName = 'music';
 		}
 	}
-	console.log('loading', loading);
+
 	return (
 		<View style={styles.container}>
 			<FontAwesome5

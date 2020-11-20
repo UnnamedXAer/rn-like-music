@@ -1,5 +1,5 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
 	View,
 	ScrollView,
@@ -26,6 +26,21 @@ interface Props {
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const isPlaying = useIsPlaying();
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
+	const [bufferedState, setBufferedState] = useState(0);
+
+	const updateSongList = useCallback(() => {
+		console.log('updating list');
+		TrackPlayer.getQueue().then((_queue) => {
+			dispatchTracks({
+				type: TracksActionTypes.SetQueue,
+				payload: _queue,
+			});
+		});
+	}, [dispatchTracks]);
+
+	useEffect(() => {
+		updateSongList();
+	}, [updateSongList]);
 
 	const mainButtonPressHandler = () => {
 		if (!isPlaying) {
@@ -65,29 +80,32 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					{tracksState.currentTruck ? tracksState.currentTruck.title : '-'}
 				</Text>
 				<TrackPlayerProgress />
+				<Text>{bufferedState}</Text>
 			</View>
 			<View>
-				<Button
-					title="show queue"
-					onPress={() =>
-						TrackPlayer.getQueue().then((_queue) => {
-							dispatchTracks({
-								type: TracksActionTypes.SetQueue,
-								payload: _queue,
-							});
-						})
-					}
-				/>
-				<Button
-					title="Reset queue"
-					onPress={() =>
-						TrackPlayer.reset().then(() =>
-							dispatchTracks({
-								type: TracksActionTypes.ResetQueue,
-							}),
-						)
-					}
-				/>
+				<Button title="show queue" onPress={updateSongList} />
+				<View style={{ flexDirection: 'row' }}>
+					<Button
+						size="small"
+						title="Reset queue"
+						onPress={() =>
+							TrackPlayer.reset().then(() =>
+								dispatchTracks({
+									type: TracksActionTypes.ResetQueue,
+								}),
+							)
+						}
+					/>
+					<Button
+						size="small"
+						title="Show buffered status"
+						onPress={() =>
+							TrackPlayer.getBufferedPosition().then((buffered) =>
+								setBufferedState(buffered),
+							)
+						}
+					/>
+				</View>
 			</View>
 			<ScrollView>
 				{true /*isPlayerInitialized*/ ? (

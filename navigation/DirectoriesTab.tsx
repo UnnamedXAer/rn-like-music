@@ -33,7 +33,7 @@ const DirectoriesTabNavigator = () => {
 	if (colorScheme === 'dark') {
 		tabBarOptions.activeTintColor = Colors.dark.text;
 	}
-	console.log('tabBarOptions', tabBarOptions);
+
 	return (
 		<DirectoriesTab.Navigator tabBarOptions={tabBarOptions}>
 			<DirectoriesTab.Screen

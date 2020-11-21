@@ -1,12 +1,10 @@
-// import { Ionicons, Feather, Octicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import Colors from '../../constants/Colors';
 import Layout from '../../constants/Layout';
 
 import { ColorSchemeName } from '../../hooks/useColorScheme';
 import useColorScheme from '../../hooks/useColorScheme';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Text } from './Themed';
 
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -21,6 +19,7 @@ interface Props {
 	size?: ButtonSize;
 	mode?: ButtonMode;
 	error?: boolean;
+	color?: string;
 }
 
 export default function Button({
@@ -32,6 +31,7 @@ export default function Button({
 	mode = 'outlined',
 	size = 'medium',
 	error,
+	color,
 }: Props) {
 	let colorScheme = useColorScheme();
 	if (theme) {
@@ -49,11 +49,13 @@ export default function Button({
 		borderColor = Colors[colorScheme].text;
 	}
 
-	let color = Colors[colorScheme].text;
+	let textColor = Colors[colorScheme].text;
 	if (disabled) {
-		color = Colors.colors.disabled;
+		textColor = Colors.colors.disabled;
+	} else if (color) {
+		textColor = color;
 	} else if (mode === 'contained') {
-		color = Colors[colorScheme].background;
+		textColor = Colors[colorScheme].background;
 	}
 
 	const styles = StyleSheet.create({
@@ -64,18 +66,13 @@ export default function Button({
 			borderWidth: 1,
 			padding: Layout.spacing(size === 'small' ? 0.5 : 1),
 			margin: Layout.spacing(),
-			...(Platform.OS === 'ios'
-				? {
-						shadowColor: '#fff',
-						shadowOffset: {
-							width: Layout.baseRadius,
-							height: Layout.baseRadius,
-						},
-						shadowOpacity: 0.6,
-				  }
-				: {
-						// elevation: 5,
-				  }),
+			shadowColor: '#fff',
+			shadowOffset: {
+				width: Layout.baseRadius,
+				height: Layout.baseRadius,
+			},
+			shadowOpacity: 0.6,
+			// elevation: 5,
 		},
 		container: {
 			marginHorizontal: Layout.spacing(),
@@ -92,7 +89,7 @@ export default function Button({
 		text: {
 			marginLeft: loading ? Layout.spacing() : 0,
 			fontSize,
-			color,
+			color: textColor,
 		},
 	});
 

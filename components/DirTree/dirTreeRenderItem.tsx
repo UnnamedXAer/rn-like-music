@@ -7,16 +7,26 @@ import DirItemText from './dirItemText';
 interface Props {
 	item: Dir;
 	onDirPress: (dir: Dir) => Promise<void>;
+	onDirLongPress: (dir: Dir) => void;
 	loading: boolean | undefined;
 	color: string;
 }
 
-export default function DirRenderItem({ item, onDirPress, loading, color }: Props) {
+export default function DirRenderItem({
+	item,
+	onDirPress,
+	onDirLongPress,
+	loading,
+	color,
+}: Props) {
 	return (
 		<View style={[styles.container]}>
 			<DirItemText
 				onPress={() => {
 					onDirPress(item);
+				}}
+				onLongPress={() => {
+					onDirLongPress(item);
 				}}
 				loading={loading}
 				color={color}

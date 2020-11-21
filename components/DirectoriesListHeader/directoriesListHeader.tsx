@@ -18,6 +18,7 @@ const DirectoriesListHeader: React.FC<Props> = ({ onPress, currentPath }) => {
 			<ScrollView horizontal>
 				{pathParts.map((path, idx) => (
 					<TouchableOpacity
+						key={path}
 						style={styles.touchable}
 						onPress={() => {
 							const relativePath = [];
@@ -27,9 +28,12 @@ const DirectoriesListHeader: React.FC<Props> = ({ onPress, currentPath }) => {
 							console.log('relativePath:', relativePath.join('/'));
 							onPress(relativePath.join('/'));
 						}}>
-						<ThemedText style={[styles.text]}>
+						<ThemedText style={styles.text}>
 							{path.length > 20 ? path.substr(0, 20) + '...' : path}{' '}
-							<FontAwesome5Icon name="chevron-right" />
+							<FontAwesome5Icon
+								name="chevron-right"
+								size={Layout.spacing(1.7)}
+							/>
 						</ThemedText>
 					</TouchableOpacity>
 				))}
@@ -45,16 +49,23 @@ const styles = StyleSheet.create({
 		paddingHorizontal: Layout.spacing(2),
 		flexDirection: 'row',
 		position: 'relative',
+		elevation: 6,
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 2.5,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
 	},
 	containerOverlay: {
+		position: 'absolute',
 		backgroundColor: '#000',
 		opacity: 0.2,
-		position: 'absolute',
 		left: 0,
 		top: 0,
 		right: 0,
 		bottom: 0,
-		// width: '100%',
 	},
 	touchable: {
 		paddingVertical: Layout.spacing(),

@@ -63,16 +63,8 @@ export const getDirSongs = async (path: string) => {
 		const currentPath = paths.shift()!;
 		const dirs = await RNFS.readDir(currentPath);
 
-		console.log();
-		console.log();
-		console.log();
-		console.log(
-			dirs.map((x, idx) => idx + '. ' + (x ? x.path : '-- undefined ')).join('\n'),
-		);
-
 		for (let i = dirs.length - 1; i >= 0; i--) {
 			const dir = dirs[i];
-			console.log(i + '. dir', dir);
 			if (dir.isDirectory()) {
 				paths.push(dir.path);
 				continue;
@@ -84,9 +76,6 @@ export const getDirSongs = async (path: string) => {
 			console.log('NOT a direction and NOT a file!!!', dir);
 		}
 	} while (paths.length > 0);
-	console.log();
-	console.log();
-	console.log(songs.length);
 	return songs;
 };
 

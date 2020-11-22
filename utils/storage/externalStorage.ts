@@ -9,17 +9,11 @@ const loopThroughDirs = async (path: string) => {
 			const dir = dirs[i];
 			if (!dir) {
 				console.log('NO DIR', dir);
-			} else {
-				elements.push(
-					new Dir(
-						dir.path,
-						dir.name,
-						+dir.size,
-						dir.isDirectory(),
-						dir.isFile(),
-					),
-				);
+				continue;
 			}
+			elements.push(
+				new Dir(dir.path, dir.name, +dir.size, dir.isDirectory(), dir.isFile()),
+			);
 		}
 		return elements;
 	} else {
@@ -69,8 +63,10 @@ export const getDirSongs = async (path: string) => {
 				paths.push(dir.path);
 				continue;
 			}
-			if (dir.isFile() && dir.name.endsWith('.mp3')) {
-				songs.push(new Dir(dir.path, dir.name, +dir.size, false, true));
+			if (dir.isFile()) {
+				if (dir.name.endsWith('.mp3')) {
+					songs.push(new Dir(dir.path, dir.name, +dir.size, false, true));
+				}
 				continue;
 			}
 			console.log('NOT a direction and NOT a file!!!', dir);

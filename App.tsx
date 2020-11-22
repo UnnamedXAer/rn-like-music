@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import TracksProvider from './context/tracksContext';
+import PlayerContextProvider from './context/playerContext';
+import TracksContextProvider from './context/tracksContext';
 
 import useStoragePermission from './hooks/useStoragePermission';
 import Navigator from './navigation';
@@ -29,9 +30,11 @@ const App = () => {
 	}
 
 	return (
-		<TracksProvider>
-			<Navigator />
-		</TracksProvider>
+		<PlayerContextProvider>
+			<TracksContextProvider>
+				<Navigator />
+			</TracksContextProvider>
+		</PlayerContextProvider>
 	);
 };
 

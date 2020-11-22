@@ -1,21 +1,18 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import {
-	View,
-	ScrollView,
-	ActivityIndicator,
-	StyleSheet,
-	TouchableOpacity,
-	Alert,
-} from 'react-native';
+import React, { useCallback, useContext, useEffect } from 'react';
+import { View, StyleSheet, ToastAndroid } from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
-import TrackPlayerProgress from '../components/TrackPlayerProgress/TrackPlayerProgress';
 import Button from '../components/UI/Button';
 import { RootStackParamList } from '../navigation/types/RootStackTypes';
-import { View as ThemedView, Text } from '../components/UI/Themed';
-import useIsPlaying from '../hooks/useIsPlaying';
+import { View as ThemedView } from '../components/UI/Themed';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
-import Layout from '../constants/Layout';
+import PlayerQueue from '../components/Player/PlayerQueue/playerQueue';
+import { PlayerContext } from '../context/playerContext';
+import PlayerCurrentSongState from '../components/Player/PlayerCurrentSongState/playerCurrentSongState';
+import PlayerMainButton from '../components/Player/PlayerMainButton/playerMainButton';
+import PlayerMainSkipButton from '../components/Player/PlayerMainSkipButton/playerMainSkipButton';
+import PlayerSkipButtonSongName from '../components/Player/PlayerMainSkipButton/PlayerSkipButtonSongName/playerSkipButtonSongName';
+import PlayerActions from '../components/PlayerActions/playerActions';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -24,9 +21,13 @@ interface Props {
 }
 
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
-	const isPlaying = useIsPlaying();
+	const { error, isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
-	const [bufferedState, setBufferedState] = useState(0);
+
+	useEffect(() => {
+		ToastAndroid.show('Internal player error occurred.', ToastAndroid.LONG);
+		console.log('Player error', error);
+	}, [error]);
 
 	const updateSongList = useCallback(() => {
 		console.log('updating list');
@@ -51,40 +52,41 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	};
 
 	const queueItemPressHandler = async (track: Track) => {
-		if (track.id === tracksState.currentTruck?.id) {
+		if (track.id === tracksState.currentTrack?.id) {
 			return;
 		}
 		try {
 			await TrackPlayer.skip(track.id);
-			// await TrackPlayer.play();
-			dispatchTracks({ type: TracksActionTypes.SetCurrentTrack, payload: track });
+			if (!isPlaying) {
+				await TrackPlayer.play();
+			}
 		} catch (err) {
-			Alert.alert('', "Sorry couldn't play the song.");
+			ToastAndroid.show("Sorry couldn't play the song.", ToastAndroid.SHORT);
 			console.log('queueItemPressHandler err', err);
 		}
 	};
 
 	return (
 		<ThemedView style={styles.container}>
-			<Text>{new Date().toLocaleString('en-US')}</Text>
 			<Button
 				onPress={() => navigation.navigate('Directories')}
 				title="Add Songs"
 			/>
-			<Button
-				onPress={mainButtonPressHandler}
-				title={isPlaying ? 'Pause' : 'Play'}
+			<PlayerActions
+				mainButtonAction={isPlaying ? 'pause' : 'play'}
+				mainButtonPressHandler={mainButtonPressHandler}
+				nextTrack={tracksState.nextTrack}
+				previousTrack={tracksState.previousTrack}
 			/>
-			<View style={styles.soundPlayerWrapper}>
-				<Text>
-					{tracksState.currentTruck ? tracksState.currentTruck.title : '-'}
-				</Text>
-				<TrackPlayerProgress />
-				<Text>{bufferedState}</Text>
-			</View>
+			<PlayerCurrentSongState currentTrack={tracksState.currentTrack} />
 			<View>
-				<Button title="show queue" onPress={updateSongList} />
-				<View style={{ flexDirection: 'row' }}>
+				<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+					<Button
+						size="small"
+						title="show queue"
+						onPress={updateSongList}
+						color="violet"
+					/>
 					<Button
 						size="small"
 						title="Reset queue"
@@ -96,59 +98,14 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 							)
 						}
 					/>
-					<Button
-						size="small"
-						title="Show buffered status"
-						onPress={() =>
-							TrackPlayer.getBufferedPosition().then((buffered) =>
-								setBufferedState(buffered),
-							)
-						}
-					/>
 				</View>
 			</View>
-			<ScrollView>
-				{true /*isPlayerInitialized*/ ? (
-					<>
-						<Text>Tracks in queue: {tracksState.queue.length}</Text>
-						{tracksState.queue.map((track) => {
-							return (
-								<TouchableOpacity
-									key={track.id}
-									onPress={() => queueItemPressHandler(track)}>
-									<View
-										style={[
-											{
-												flexDirection: 'column',
-												margin: 4,
-												borderWidth: 1,
-											},
-										]}>
-										<Text
-											style={[
-												{
-													fontSize: 12,
-												},
-												track.id === tracksState.currentTruck?.id
-													? {
-															color: 'yellow',
-													  }
-													: {},
-											]}>
-											{track.title}
-										</Text>
-										<Text style={{ fontSize: 8 }}>
-											{track.duration}
-										</Text>
-									</View>
-								</TouchableOpacity>
-							);
-						})}
-					</>
-				) : (
-					<ActivityIndicator />
-				)}
-			</ScrollView>
+			<PlayerQueue
+				queue={tracksState.queue}
+				currentTrackId={tracksState.currentTrack?.id}
+				loading={false}
+				onSongPress={queueItemPressHandler}
+			/>
 		</ThemedView>
 	);
 };
@@ -156,19 +113,6 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-	},
-	soundPlayerWrapper: {
-		marginVertical: Layout.spacing(2),
-		marginHorizontal: Layout.spacing(2),
-		paddingHorizontal: Layout.spacing(2),
-		borderColor: 'lightblue',
-		borderWidth: 1,
-		borderStyle: 'dashed',
-	},
-	flatListTitle: {
-		fontSize: Layout.spacing(3),
-		fontWeight: 'bold',
-		textAlign: 'center',
 	},
 });
 export default PlayScreen;

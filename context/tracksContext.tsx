@@ -1,5 +1,9 @@
 import React, { useReducer } from 'react';
-import { Track } from 'react-native-track-player';
+import TrackPlayer, {
+	Event,
+	Track,
+	useTrackPlayerEvents,
+} from 'react-native-track-player';
 
 type ActionMap<M extends { [key: string]: any }> = {
 	[Key in keyof M]: M[Key] extends undefined
@@ -14,7 +18,9 @@ type ActionMap<M extends { [key: string]: any }> = {
 
 export type TracksState = {
 	queue: Track[];
-	currentTruck: Track | null;
+	currentTrack: Track | null;
+	nextTrack: Track | null;
+	previousTrack: Track | null;
 };
 
 export enum TracksActionTypes {
@@ -27,7 +33,9 @@ export enum TracksActionTypes {
 
 const initialState: TracksState = {
 	queue: [],
-	currentTruck: null,
+	currentTrack: null,
+	nextTrack: null,
+	previousTrack: null,
 };
 
 type ActionPayload = {
@@ -41,7 +49,7 @@ type ActionPayload = {
 type TracksActions = ActionMap<ActionPayload>[keyof ActionMap<ActionPayload>];
 
 const reducer = (state: TracksState, action: TracksActions): TracksState => {
-	console.log('action', action.type);
+	console.log('TracksContext action ->', action.type);
 	switch (action.type) {
 		case TracksActionTypes.AddToQueue:
 			const updatedQueue = [...state.queue];
@@ -67,9 +75,31 @@ const reducer = (state: TracksState, action: TracksActions): TracksState => {
 				queue: updatedQueueR,
 			};
 		case TracksActionTypes.SetCurrentTrack:
-			return { ...state, currentTruck: action.payload };
+			const currentTrack = { ...action.payload } as Track | null;
+			let nextTrack: Track | null = null;
+			let prevTrack: Track | null = null;
+			if (currentTrack !== null) {
+				const currTrackIdx = state.queue.findIndex(
+					(x) => x.id === currentTrack.id,
+				);
+				nextTrack =
+					state.queue[
+						currTrackIdx >= state.queue.length ? 0 : currTrackIdx + 1
+					];
+				prevTrack =
+					state.queue[
+						currTrackIdx === 0 ? state.queue.length : currTrackIdx - 1
+					];
+			}
+			return {
+				...state,
+				currentTrack: currentTrack,
+				nextTrack: nextTrack,
+				previousTrack: prevTrack,
+			};
+
 		case TracksActionTypes.ResetQueue:
-			return { ...state, queue: [], currentTruck: null };
+			return { ...state, queue: [], currentTrack: null };
 		default:
 			return state;
 	}
@@ -83,8 +113,18 @@ export const TracksContext = React.createContext<{
 	dispatchTracks: () => null,
 });
 
-const TracksProvider: React.FC = ({ children }) => {
+const TracksContextProvider: React.FC = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
+
+	useTrackPlayerEvents([Event.PlaybackTrackChanged], () => {
+		TrackPlayer.getCurrentTrack().then((trackId) => {
+			const track = state.queue.find((x) => x.id === trackId);
+			dispatch({
+				type: TracksActionTypes.SetCurrentTrack,
+				payload: track || null,
+			});
+		});
+	});
 
 	return (
 		<TracksContext.Provider value={{ tracksState: state, dispatchTracks: dispatch }}>
@@ -93,4 +133,4 @@ const TracksProvider: React.FC = ({ children }) => {
 	);
 };
 
-export default TracksProvider;
+export default TracksContextProvider;

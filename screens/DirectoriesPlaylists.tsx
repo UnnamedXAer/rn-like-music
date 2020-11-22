@@ -7,7 +7,7 @@ import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
 import { StateError } from '../types/reactTypes';
-import { readStorage } from '../utils/storage/readStorage';
+import { readStorage } from '../utils/storage/externalStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types/RootStackTypes';

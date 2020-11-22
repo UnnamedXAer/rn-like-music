@@ -4,10 +4,10 @@ export const trackPlayerInit = async () => {
 	await TrackPlayer.setupPlayer({});
 	TrackPlayer.updateOptions({
 		// One of RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE
-		ratingType: RatingType.FiveStars,
+		ratingType: RatingType.Percentage,
 
 		// Whether the player should stop running when the app is closed on Android
-		stopWithApp: false,
+		stopWithApp: true,
 
 		// An array of media controls capabilities
 		// Can contain CAPABILITY_PLAY, CAPABILITY_PAUSE, CAPABILITY_STOP, CAPABILITY_SEEK_TO,

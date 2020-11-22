@@ -7,7 +7,7 @@ import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
 import { StateError } from '../types/reactTypes';
-import { getDirInfo, getDirSongs, readStorage } from '../utils/storage/readStorage';
+import { getDirInfo, getDirSongs, readStorage } from '../utils/storage/externalStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types/RootStackTypes';
@@ -19,7 +19,7 @@ import DirectoriesListHeader from '../components/DirectoriesListHeader/directori
 import DirItemDialog, {
 	DirDialogOptions,
 } from '../components/DirTree/DirTreeItemDialog/dirItemDialog';
-import assertUnreachable from '../utils/storage/assertUnreachable';
+import assertUnreachable from '../utils/assertUnreachable';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 

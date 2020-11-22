@@ -1,6 +1,6 @@
 import { Dimensions } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import getDeviceSize from '../utils/storage/getDeviceSize';
+import getDeviceSize from '../utils/getDeviceSize';
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;

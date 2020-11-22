@@ -1,5 +1,5 @@
 import { Dimensions } from 'react-native';
-import { DeviceSize } from '../../types/types';
+import { DeviceSize } from '../types/types';
 
 export default function getDeviceSize(): DeviceSize {
 	const width = Dimensions.get('window').width;

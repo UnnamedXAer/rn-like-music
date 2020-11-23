@@ -75,20 +75,22 @@ const reducer = (state: TracksState, action: TracksActions): TracksState => {
 				queue: updatedQueueR,
 			};
 		case TracksActionTypes.SetCurrentTrack:
-			const currentTrack = { ...action.payload } as Track | null;
+			const currentTrack: Track | null = action.payload
+				? { ...action.payload }
+				: null;
 			let nextTrack: Track | null = null;
 			let prevTrack: Track | null = null;
-			if (currentTrack !== null) {
+			if (currentTrack !== null && state.queue.length > 0) {
 				const currTrackIdx = state.queue.findIndex(
 					(x) => x.id === currentTrack.id,
 				);
 				nextTrack =
 					state.queue[
-						currTrackIdx >= state.queue.length ? 0 : currTrackIdx + 1
+						currTrackIdx === state.queue.length - 1 ? 0 : currTrackIdx + 1
 					];
 				prevTrack =
 					state.queue[
-						currTrackIdx === 0 ? state.queue.length : currTrackIdx - 1
+						currTrackIdx === 0 ? state.queue.length - 1 : currTrackIdx - 1
 					];
 			}
 			return {

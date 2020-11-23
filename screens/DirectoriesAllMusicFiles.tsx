@@ -10,7 +10,7 @@ import { StateError } from '../types/reactTypes';
 import { readStorage } from '../utils/storage/externalStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types/RootStackTypes';
+import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;

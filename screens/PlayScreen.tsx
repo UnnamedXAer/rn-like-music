@@ -1,36 +1,38 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useContext, useEffect } from 'react';
-import { View, StyleSheet, ToastAndroid } from 'react-native';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { View, StyleSheet, ToastAndroid, Alert } from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import Button from '../components/UI/Button';
-import { RootStackParamList } from '../navigation/types/RootStackTypes';
+import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { View as ThemedView } from '../components/UI/Themed';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 import PlayerQueue from '../components/Player/PlayerQueue/playerQueue';
 import { PlayerContext } from '../context/playerContext';
 import PlayerCurrentSongState from '../components/Player/PlayerCurrentSongState/playerCurrentSongState';
-import PlayerMainButton from '../components/Player/PlayerMainButton/playerMainButton';
-import PlayerMainSkipButton from '../components/Player/PlayerMainSkipButton/playerMainSkipButton';
-import PlayerSkipButtonSongName from '../components/Player/PlayerMainSkipButton/PlayerSkipButtonSongName/playerSkipButtonSongName';
 import PlayerActions from '../components/PlayerActions/playerActions';
+import { SkipSong } from '../components/Player/PlayerMainSkipButton/playerMainSkipButton';
+import QueueSongMenu, {
+	QueueSongOptionsOption,
+} from '../components/Player/QueueSongMenu/queueSongMenu';
+import assertUnreachable from '../utils/assertUnreachable';
+import { getDirInfo } from '../utils/storage/externalStorage';
+import { playTrack } from '../trackPlayer/playerUtils';
+import { RouteProp } from '@react-navigation/native';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
+type PlayScreenRouteProp = RouteProp<RootStackParamList, 'Play'>;
 interface Props {
 	navigation: ScreenNavigationProp;
+	route: PlayScreenRouteProp;
 }
 
-const PlayScreen: React.FC<Props> = ({ navigation }) => {
-	const { error, isPlaying } = useContext(PlayerContext);
+const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
+	const { isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
-
-	useEffect(() => {
-		ToastAndroid.show('Internal player error occurred.', ToastAndroid.LONG);
-		console.log('Player error', error);
-	}, [error]);
+	const [longPressedSong, setLongPressedSong] = useState<Track | null>(null);
 
 	const updateSongList = useCallback(() => {
-		console.log('updating list');
 		TrackPlayer.getQueue().then((_queue) => {
 			dispatchTracks({
 				type: TracksActionTypes.SetQueue,
@@ -43,6 +45,16 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		updateSongList();
 	}, [updateSongList]);
 
+	useEffect(() => {
+		// console.log('route.params', route.params);
+		// if (route.params?.queueUpdated && tracksState.currentTrack) {
+		// 	playTrack(tracksState.currentTrack).catch((err) =>
+		// 		console.log('ERRRRR,', err),
+		// 	);
+		// 	navigation.setParams({ queueUpdated: false });
+		// }
+	}, [navigation, route.params, tracksState.currentTrack]);
+
 	const mainButtonPressHandler = () => {
 		if (!isPlaying) {
 			TrackPlayer.play();
@@ -51,62 +63,120 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
-	const queueItemPressHandler = async (track: Track) => {
-		if (track.id === tracksState.currentTrack?.id) {
-			return;
-		}
+	const skipSongHandler: SkipSong = async (direction) => {
 		try {
-			await TrackPlayer.skip(track.id);
-			if (!isPlaying) {
-				await TrackPlayer.play();
+			if (direction === 'next') {
+				if (tracksState.nextTrack) {
+					return await playTrack(
+						tracksState.nextTrack,
+						tracksState.currentTrack,
+						isPlaying,
+					);
+				}
+				ToastAndroid.show('There is no next track.', ToastAndroid.SHORT);
 			}
+			if (tracksState.previousTrack) {
+				return await playTrack(
+					tracksState.previousTrack,
+					tracksState.currentTrack,
+					isPlaying,
+				);
+			}
+			ToastAndroid.show('There is no previous track.', ToastAndroid.SHORT);
 		} catch (err) {
-			ToastAndroid.show("Sorry couldn't play the song.", ToastAndroid.SHORT);
-			console.log('queueItemPressHandler err', err);
+			ToastAndroid.show(
+				'Player internal error.' + (__DEV__ ? err.message : ''),
+				ToastAndroid.SHORT,
+			);
 		}
 	};
 
+	const queueItemPressHandler = (track: Track) => {
+		return playTrack(track, tracksState.currentTrack, isPlaying);
+	};
+
+	const queueItemLongPressHandler = async (track: Track) => {
+		setLongPressedSong(track);
+	};
+	const queueMenuItemPressHandler = async (option: QueueSongOptionsOption) => {
+		if (longPressedSong === null) {
+			return ToastAndroid.show('Internal error.', ToastAndroid.SHORT);
+		}
+
+		try {
+			switch (option) {
+				case 'PLAY':
+					playTrack(longPressedSong, tracksState.currentTrack, isPlaying);
+					break;
+				case 'REMOVE_FROM_QUEUE':
+					await TrackPlayer.remove(longPressedSong);
+					break;
+				case 'SHOW_INFO':
+					const info = await getDirInfo(longPressedSong.id);
+					Alert.alert(JSON.stringify(info, null, '\t'));
+					break;
+				default:
+					assertUnreachable(option);
+			}
+		} catch (err) {
+			ToastAndroid.show(
+				'Player internal error.' + (__DEV__ ? err.message : ''),
+				ToastAndroid.SHORT,
+			);
+		}
+		setLongPressedSong(null);
+	};
+
 	return (
-		<ThemedView style={styles.container}>
-			<Button
-				onPress={() => navigation.navigate('Directories')}
-				title="Add Songs"
-			/>
-			<PlayerActions
-				mainButtonAction={isPlaying ? 'pause' : 'play'}
-				mainButtonPressHandler={mainButtonPressHandler}
-				nextTrack={tracksState.nextTrack}
-				previousTrack={tracksState.previousTrack}
-			/>
-			<PlayerCurrentSongState currentTrack={tracksState.currentTrack} />
-			<View>
-				<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-					<Button
-						size="small"
-						title="show queue"
-						onPress={updateSongList}
-						color="violet"
-					/>
-					<Button
-						size="small"
-						title="Reset queue"
-						onPress={() =>
-							TrackPlayer.reset().then(() =>
-								dispatchTracks({
-									type: TracksActionTypes.ResetQueue,
-								}),
-							)
-						}
-					/>
+		<>
+			<ThemedView style={styles.container}>
+				<Button
+					onPress={() => navigation.navigate('Directories')}
+					title="Add Songs"
+				/>
+				<PlayerActions
+					mainButtonAction={isPlaying ? 'pause' : 'play'}
+					mainButtonPressHandler={mainButtonPressHandler}
+					nextTrack={tracksState.nextTrack}
+					previousTrack={tracksState.previousTrack}
+					skipSong={skipSongHandler}
+				/>
+				<PlayerCurrentSongState currentTrack={tracksState.currentTrack} />
+				<View>
+					<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+						<Button
+							size="small"
+							title="show queue"
+							onPress={updateSongList}
+							color="violet"
+						/>
+						<Button
+							size="small"
+							title="Reset queue"
+							onPress={() =>
+								TrackPlayer.reset().then(() =>
+									dispatchTracks({
+										type: TracksActionTypes.ResetQueue,
+									}),
+								)
+							}
+						/>
+					</View>
 				</View>
-			</View>
-			<PlayerQueue
-				queue={tracksState.queue}
-				currentTrackId={tracksState.currentTrack?.id}
-				loading={false}
-				onSongPress={queueItemPressHandler}
+				<PlayerQueue
+					queue={tracksState.queue}
+					currentTrackId={tracksState.currentTrack?.id}
+					loading={false}
+					onSongPress={queueItemPressHandler}
+					onSongLongPress={queueItemLongPressHandler}
+				/>
+			</ThemedView>
+			<QueueSongMenu
+				onItemPress={queueMenuItemPressHandler}
+				onPressOutside={() => setLongPressedSong(null)}
+				visible={longPressedSong !== null}
 			/>
-		</ThemedView>
+		</>
 	);
 };
 

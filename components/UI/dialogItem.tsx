@@ -1,13 +1,13 @@
 import React from 'react';
 import { TouchableHighlight } from 'react-native';
-import { Text } from '../../UI/Themed';
+import { Text } from './Themed';
 
 interface Props {
 	title: string;
 	onPress: () => void;
 }
 
-const DirItemDialogItem: React.FC<Props> = ({ onPress, title }) => {
+const DialogItem: React.FC<Props> = ({ onPress, title }) => {
 	return (
 		<TouchableHighlight onPress={onPress}>
 			<Text>{title}</Text>
@@ -15,4 +15,4 @@ const DirItemDialogItem: React.FC<Props> = ({ onPress, title }) => {
 	);
 };
 
-export default DirItemDialogItem;
+export default DialogItem;

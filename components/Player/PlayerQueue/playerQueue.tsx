@@ -13,6 +13,7 @@ import { Text as ThemedText } from '../../UI/Themed';
 interface Props {
 	queue: Track[];
 	onSongPress: (track: Track) => Promise<void>;
+	onSongLongPress: (track: Track) => Promise<void>;
 	currentTrackId: Track['id'] | undefined;
 	loading: boolean;
 }
@@ -20,40 +21,43 @@ interface Props {
 const PlayerQueue: React.FC<Props> = ({
 	currentTrackId,
 	queue,
-	onSongPress: songPressHandler,
+	onSongPress,
+	onSongLongPress,
 	loading,
 }) => {
 	return loading ? (
 		<ActivityIndicator />
 	) : (
 		<>
-			<ThemedText style={styles.listInfo}>
-				Tracks in queue: {queue.length}
-			</ThemedText>
 			<ScrollView>
 				{queue.map((track) => {
 					return (
-						<TouchableOpacity
-							key={track.id}
-							onPress={() => songPressHandler(track)}
-							style={styles.trackContainer}>
-							<ThemedText
-								style={[
-									styles.trackTitle,
-									{
-										fontWeight:
-											track.id === currentTrackId
-												? '700'
-												: 'normal',
-									},
-								]}>
-								{track.title}
-							</ThemedText>
+						<React.Fragment key={track.id}>
+							<TouchableOpacity
+								onPress={() => onSongPress(track)}
+								onLongPress={() => onSongLongPress(track)}
+								style={styles.trackContainer}>
+								<ThemedText
+									style={[
+										styles.trackTitle,
+										{
+											fontWeight:
+												track.id === currentTrackId
+													? '700'
+													: 'normal',
+										},
+									]}>
+									{track.title}
+								</ThemedText>
+							</TouchableOpacity>
 							<Separator separatorStyle={styles.songSeparator} />
-						</TouchableOpacity>
+						</React.Fragment>
 					);
 				})}
 			</ScrollView>
+			<ThemedText style={styles.listInfo}>
+				Tracks in queue: {queue.length}
+			</ThemedText>
 		</>
 	);
 };
@@ -61,8 +65,10 @@ const PlayerQueue: React.FC<Props> = ({
 const styles = StyleSheet.create({
 	listInfo: {
 		fontStyle: 'italic',
+		textAlign: 'right',
 		marginHorizontal: Layout.spacing(1),
-		marginBottom: Layout.spacing(0.5),
+		marginVertical: Layout.spacing(0.5),
+		fontSize: 12,
 	},
 	trackContainer: {
 		flexDirection: 'column',
@@ -70,7 +76,6 @@ const styles = StyleSheet.create({
 			Layout.deviceSize === 'medium' ? 1.5 : Layout.deviceSize === 'tablet' ? 3 : 1,
 		),
 		marginVertical: Layout.spacing(0.5),
-		// borderWidth: 1,
 	},
 	trackTitle: {
 		fontSize: 14,

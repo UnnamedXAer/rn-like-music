@@ -10,7 +10,7 @@ import { StateError } from '../types/reactTypes';
 import { getDirInfo, getDirSongs, readStorage } from '../utils/storage/externalStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types/RootStackTypes';
+import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 import useColorScheme from '../hooks/useColorScheme';
 import DirItemSeparator from '../components/DirTree/dirItemSeparator';
@@ -171,14 +171,14 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		} catch (err) {
 			console.log('clearNowPlayingMetadata err', err);
 		}
-		navigation.navigate('Play');
+		navigation.navigate('Play', { queueUpdated: false });
 	};
 
 	const updateQueueHandler = async () => {
 		setQueueUpdateInProgress(true);
 		const tracks = mapSelectedFilesToTracks(selectedFiles);
 		await addTracksToQueue(tracks, true);
-		navigation.navigate('Play');
+		navigation.navigate('Play', { queueUpdated: false });
 	};
 
 	return (

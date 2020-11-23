@@ -49,7 +49,6 @@ type ActionPayload = {
 type TracksActions = ActionMap<ActionPayload>[keyof ActionMap<ActionPayload>];
 
 const reducer = (state: TracksState, action: TracksActions): TracksState => {
-	console.log('TracksContext action ->', action.type);
 	switch (action.type) {
 		case TracksActionTypes.AddToQueue:
 			const updatedQueue = [...state.queue];

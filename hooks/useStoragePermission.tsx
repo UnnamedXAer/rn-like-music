@@ -8,7 +8,6 @@ export default function useStoragePermission() {
 	useEffect(() => {
 		PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE)
 			.then((res) => {
-				console.log(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE, res);
 				if (res === PermissionsAndroid.RESULTS.GRANTED) {
 					setReadPermissionGranted(true);
 				}
@@ -17,10 +16,6 @@ export default function useStoragePermission() {
 				PermissionsAndroid.request(
 					PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
 				).then((res) => {
-					console.log(
-						PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-						res,
-					);
 					if (res === PermissionsAndroid.RESULTS.GRANTED) {
 						setWritePermissionGranted(true);
 					}

@@ -2,15 +2,15 @@ import React from 'react';
 import Dialog, { DialogData } from '../../UI/Dialog';
 import DialogItem from '../../UI/dialogItem';
 
-export type DirDialogOptions = 'PLAY' | 'ADD_TO_QUEUE' | 'SHOW_INFO';
+export type QueueSongOptionsOption = 'PLAY' | 'REMOVE_FROM_QUEUE' | 'SHOW_INFO';
 
 interface Props {
 	visible: boolean;
-	onItemPress: (action: DirDialogOptions) => void;
+	onItemPress: (action: QueueSongOptionsOption) => void;
 	onPressOutside: DialogData['onPressOutside'];
 }
 
-const DirItemDialog: React.FC<Props> = ({ visible, onPressOutside, onItemPress }) => {
+const QueueSongMenu: React.FC<Props> = ({ visible, onPressOutside, onItemPress }) => {
 	return (
 		<Dialog
 			onPressOutside={onPressOutside}
@@ -20,8 +20,8 @@ const DirItemDialog: React.FC<Props> = ({ visible, onPressOutside, onItemPress }
 				<>
 					<DialogItem onPress={() => onItemPress('PLAY')} title="Play" />
 					<DialogItem
-						onPress={() => onItemPress('ADD_TO_QUEUE')}
-						title="Add to Queue"
+						onPress={() => onItemPress('REMOVE_FROM_QUEUE')}
+						title="Remove from queue"
 					/>
 					<DialogItem
 						onPress={() => onItemPress('SHOW_INFO')}
@@ -37,4 +37,4 @@ const DirItemDialog: React.FC<Props> = ({ visible, onPressOutside, onItemPress }
 	);
 };
 
-export default DirItemDialog;
+export default QueueSongMenu;

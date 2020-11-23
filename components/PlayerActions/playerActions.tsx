@@ -1,11 +1,12 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TracksState } from '../../context/tracksContext';
-import { getMainBtnContainerSize } from '../../utils/getMainBtnSize';
 import PlayerMainButton, {
 	MainButtonProps,
 } from '../Player/PlayerMainButton/playerMainButton';
-import PlayerMainSkipButton from '../Player/PlayerMainSkipButton/playerMainSkipButton';
+import PlayerMainSkipButton, {
+	SkipSong,
+} from '../Player/PlayerMainSkipButton/playerMainSkipButton';
 import PlayerSkipButtonSongName from '../Player/PlayerMainSkipButton/PlayerSkipButtonSongName/playerSkipButtonSongName';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 	mainButtonAction: MainButtonProps['buttonAction'];
 	nextTrack: TracksState['nextTrack'];
 	previousTrack: TracksState['previousTrack'];
+	skipSong: SkipSong;
 }
 
 const PlayerActions: React.FC<Props> = ({
@@ -20,20 +22,18 @@ const PlayerActions: React.FC<Props> = ({
 	mainButtonPressHandler,
 	nextTrack,
 	previousTrack,
+	skipSong,
 }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.skipActions}>
 				<View style={styles.skipActionContainer}>
-					<PlayerMainSkipButton direction="previous" />
-					<PlayerSkipButtonSongName
-						track={previousTrack}
-						direction="previous"
-					/>
+					<PlayerMainSkipButton direction="previous" onPress={skipSong} />
+					<PlayerSkipButtonSongName track={previousTrack} />
 				</View>
 				<View style={styles.skipActionContainer}>
-					<PlayerMainSkipButton direction="next" />
-					<PlayerSkipButtonSongName track={nextTrack} direction="next" />
+					<PlayerMainSkipButton direction="next" onPress={skipSong} />
+					<PlayerSkipButtonSongName track={nextTrack} />
 				</View>
 			</View>
 			<PlayerMainButton
@@ -51,25 +51,16 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		paddingBottom: 20,
 	},
-	mainButton: {
-		// backgroundColor: 'tomato',
-		// alignItems: 'center',
-		// height: getMainBtnContainerSize(),
-	},
 	skipActions: {
 		position: 'absolute',
 		bottom: 0,
 
-		borderWidth: 2,
-		borderColor: 'green',
 		flexDirection: 'row',
 		justifyContent: 'space-evenly',
 		alignItems: 'flex-end',
 	},
 	skipActionContainer: {
 		flex: 5,
-		borderWidth: 2,
-		borderColor: 'yellow',
 	},
 });
 

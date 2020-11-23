@@ -5,13 +5,12 @@ import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import PlayScreen from '../screens/PlayScreen';
 import DirectoriesTabNavigator from './DirectoriesTab';
-import { RootStackParamList } from './types/RootStackTypes';
+import { RootStackParamList } from './types/RootStackNavigatorTypes';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
 	const colorScheme = useColorScheme();
-	console.log('colorScheme', colorScheme);
 	return (
 		<RootStack.Navigator
 			screenOptions={{

@@ -76,8 +76,8 @@ export const getDirSongs = async (path: string) => {
 };
 
 export const getDirInfo = async (path: string) => {
-	const dirStat = await RNFS.readFileAssets(path, {});
-	console.log(dirStat);
+	const dirStat = await RNFS.readFileAssets('file://' + path, {});
+	console.log('Dir Info => ', dirStat);
 	return '';
 };
 

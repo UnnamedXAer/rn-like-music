@@ -1,6 +1,8 @@
 import { DirectoriesTabParamList } from './DirectoriesTabNavigatorTypes';
 
 export type RootStackParamList = {
-	Play: undefined;
+	Play: PlayScreenParamList;
 	Directories: DirectoriesTabParamList;
 };
+
+export type PlayScreenParamList = { queueUpdated: boolean } | undefined;

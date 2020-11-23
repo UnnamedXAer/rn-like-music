@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ToastAndroid } from 'react-native';
 import { Event, State, useTrackPlayerEvents } from 'react-native-track-player';
 import { StateError } from '../types/reactTypes';
 
@@ -17,15 +18,18 @@ export const PlayerContext = React.createContext<PlayerContextState>(initialStat
 const PlayerContextProvider: React.FC = ({ children }) => {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [error, setError] = useState<StateError>(null);
-	console.log('TracksContext - isPlaying -> ', isPlaying);
 	useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackError], (ev) => {
-		console.log('-> PlayerContext -> useTrackPlayerEvents ev: ', JSON.stringify(ev));
 		if (ev.state === State.Playing) {
 			console.log(ev.state);
 		}
 		setIsPlaying(ev.state === State.Playing);
 		if (ev.type === Event.PlaybackError) {
-			setError(error);
+			setError(ev.type);
+			ToastAndroid.show(
+				'Internal player error occurred.' + (__DEV__ ? JSON.stringify(ev) : ''),
+				ToastAndroid.SHORT,
+			);
+			console.log('IMPORTANT --------------- > Player error', ev);
 		} else if (error !== null) {
 			setError(null);
 		}

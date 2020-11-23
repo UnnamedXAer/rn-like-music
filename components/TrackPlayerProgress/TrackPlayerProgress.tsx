@@ -22,7 +22,7 @@ const TrackPlayerProgress: React.FC<Props> = ({ disabled }) => {
 				/>
 			</View>
 			<View style={styles.timesContainer}>
-				<Text>{disabled ? '-' : secondsToMinutesString(progress.position)}</Text>
+				<Text>{disabled ? '' : secondsToMinutesString(progress.position)}</Text>
 				<Text>{disabled ? '' : secondsToMinutesString(progress.duration)}</Text>
 			</View>
 		</View>

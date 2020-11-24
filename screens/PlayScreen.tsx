@@ -113,6 +113,17 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		setLongPressedSong(null);
 	};
 
+	const songSeekHandler = async (position: number) => {
+		try {
+			await TrackPlayer.seekTo(position);
+			if (isPlaying === false) {
+				await TrackPlayer.play();
+			}
+		} catch (err) {
+			showToast(INTERNAL_ERROR_MSG, err.message);
+		}
+	};
+
 	return (
 		<>
 			<ThemedView style={styles.container}>
@@ -127,7 +138,10 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					previousTrack={tracksState.previousTrack}
 					skipSong={skipSongHandler}
 				/>
-				<PlayerCurrentSongState currentTrack={tracksState.currentTrack} />
+				<PlayerCurrentSongState
+					currentTrack={tracksState.currentTrack}
+					onSeek={songSeekHandler}
+				/>
 				<View>
 					<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
 						<Button

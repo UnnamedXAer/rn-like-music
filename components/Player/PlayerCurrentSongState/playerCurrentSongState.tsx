@@ -9,9 +9,10 @@ import { Text } from '../../UI/Themed';
 
 interface Props {
 	currentTrack: TracksState['currentTrack'];
+	onSeek: (position: number) => Promise<void>;
 }
 
-const PlayerCurrentSongState: React.FC<Props> = ({ currentTrack }) => {
+const PlayerCurrentSongState: React.FC<Props> = ({ currentTrack, onSeek }) => {
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
@@ -24,7 +25,10 @@ const PlayerCurrentSongState: React.FC<Props> = ({ currentTrack }) => {
 					{currentTrack ? currentTrack.title : '- - -'}
 				</Text>
 			</TouchableOpacity>
-			<TrackPlayerProgress disabled={currentTrack === null} />
+			<TrackPlayerProgress
+				disabled={currentTrack === null}
+				onSeekComplete={onSeek}
+			/>
 		</View>
 	);
 };

@@ -5,4 +5,4 @@ export type RootStackParamList = {
 	Directories: DirectoriesTabParamList;
 };
 
-export type PlayScreenParamList = { queueUpdated: boolean } | undefined;
+export type PlayScreenParamList = undefined;

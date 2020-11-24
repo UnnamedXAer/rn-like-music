@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import RNFS from 'react-native-fs';
 import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
@@ -20,6 +20,8 @@ import DirItemDialog, {
 	DirDialogOptions,
 } from '../components/DirTree/DirTreeItemDialog/dirItemDialog';
 import assertUnreachable from '../utils/assertUnreachable';
+import showToast from '../utils/showToast';
+import { INTERNAL_ERROR_MSG } from '../constants/strings';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -60,7 +62,6 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	}>({});
 	const [queueUpdateInProgress, setQueueUpdateInProgress] = useState(false);
 	const [currentPath, setCurrentPath] = useState(RNFS.ExternalStorageDirectoryPath);
-	// const [currentPath, setCurrentPath] = useState('/storage/1B1A-3A1C/');
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
 	const { dispatchTracks } = useContext(TracksContext);
 
@@ -110,7 +111,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				return { ...prevState, [dir.path]: dir };
 			});
 		} else {
-			Alert.alert('Alert', dir.name + ' is not a mp3 file.');
+			showToast('Alert', dir.name + ' is not a mp3 file.');
 		}
 	};
 
@@ -132,7 +133,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 
 	const dialogOptionHandler = async (option: DirDialogOptions) => {
 		if (longPressedDir === null) {
-			throw new Error('no dir selected by long press!');
+			throw new Error('No dir selected by long press!');
 		}
 		switch (option) {
 			case 'ADD_TO_QUEUE': {
@@ -145,7 +146,10 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 					addTracksToQueue(mapDirsToTracks(songs), true);
 				} catch (err) {
 					console.log('err', err);
-					Alert.alert('Error', err.message);
+					showToast({
+						message: INTERNAL_ERROR_MSG,
+						devMessage: err.message,
+					});
 				}
 				break;
 			}
@@ -169,7 +173,8 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		try {
 			await TrackPlayer.clearNowPlayingMetadata();
 		} catch (err) {
-			console.log('clearNowPlayingMetadata err', err);
+			showToast(INTERNAL_ERROR_MSG, err.message);
+			console.log('addTracksToQueue err', err);
 		}
 		navigation.navigate('Play', { queueUpdated: false });
 	};

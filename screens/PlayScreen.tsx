@@ -1,6 +1,6 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, StyleSheet, ToastAndroid, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import Button from '../components/UI/Button';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
@@ -18,6 +18,8 @@ import assertUnreachable from '../utils/assertUnreachable';
 import { getDirInfo } from '../utils/storage/externalStorage';
 import { playTrack } from '../trackPlayer/playerUtils';
 import { RouteProp } from '@react-navigation/native';
+import showToast from '../utils/showToast';
+import { INTERNAL_ERROR_MSG } from '../constants/strings';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -27,7 +29,7 @@ interface Props {
 	route: PlayScreenRouteProp;
 }
 
-const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
+const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const { isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
 	const [longPressedSong, setLongPressedSong] = useState<Track | null>(null);
@@ -44,16 +46,6 @@ const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
 	useEffect(() => {
 		updateSongList();
 	}, [updateSongList]);
-
-	useEffect(() => {
-		// console.log('route.params', route.params);
-		// if (route.params?.queueUpdated && tracksState.currentTrack) {
-		// 	playTrack(tracksState.currentTrack).catch((err) =>
-		// 		console.log('ERRRRR,', err),
-		// 	);
-		// 	navigation.setParams({ queueUpdated: false });
-		// }
-	}, [navigation, route.params, tracksState.currentTrack]);
 
 	const mainButtonPressHandler = () => {
 		if (!isPlaying) {
@@ -73,7 +65,7 @@ const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
 						isPlaying,
 					);
 				}
-				ToastAndroid.show('There is no next track.', ToastAndroid.SHORT);
+				showToast('There is no next track.');
 			}
 			if (tracksState.previousTrack) {
 				return await playTrack(
@@ -82,12 +74,9 @@ const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
 					isPlaying,
 				);
 			}
-			ToastAndroid.show('There is no previous track.', ToastAndroid.SHORT);
+			showToast('There is no previous track.');
 		} catch (err) {
-			ToastAndroid.show(
-				'Player internal error.' + (__DEV__ ? err.message : ''),
-				ToastAndroid.SHORT,
-			);
+			showToast(INTERNAL_ERROR_MSG, err.message);
 		}
 	};
 
@@ -100,7 +89,7 @@ const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
 	};
 	const queueMenuItemPressHandler = async (option: QueueSongOptionsOption) => {
 		if (longPressedSong === null) {
-			return ToastAndroid.show('Internal error.', ToastAndroid.SHORT);
+			return showToast(INTERNAL_ERROR_MSG, 'Value of longPressedSong is null');
 		}
 
 		try {
@@ -119,10 +108,7 @@ const PlayScreen: React.FC<Props> = ({ navigation, route }) => {
 					assertUnreachable(option);
 			}
 		} catch (err) {
-			ToastAndroid.show(
-				'Player internal error.' + (__DEV__ ? err.message : ''),
-				ToastAndroid.SHORT,
-			);
+			showToast(INTERNAL_ERROR_MSG, err.message);
 		}
 		setLongPressedSong(null);
 	};

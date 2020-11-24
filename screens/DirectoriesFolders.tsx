@@ -165,25 +165,24 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	};
 
 	const addTracksToQueue = async (tracks: Track[], resetQueue: boolean) => {
-		if (resetQueue === true) {
-			await TrackPlayer.reset();
-		}
-		await TrackPlayer.add(tracks);
-		dispatchTracks({ type: TracksActionTypes.SetQueue, payload: tracks });
 		try {
-			await TrackPlayer.clearNowPlayingMetadata();
+			if (resetQueue === true) {
+				await TrackPlayer.reset();
+			}
+			await TrackPlayer.add(tracks);
+			dispatchTracks({ type: TracksActionTypes.SetQueue, payload: tracks });
+			await TrackPlayer.play();
 		} catch (err) {
 			showToast(INTERNAL_ERROR_MSG, err.message);
 			console.log('addTracksToQueue err', err);
 		}
-		navigation.navigate('Play', { queueUpdated: false });
+		navigation.navigate('Play');
 	};
 
 	const updateQueueHandler = async () => {
 		setQueueUpdateInProgress(true);
 		const tracks = mapSelectedFilesToTracks(selectedFiles);
 		await addTracksToQueue(tracks, true);
-		navigation.navigate('Play', { queueUpdated: false });
 	};
 
 	return (

@@ -3,7 +3,6 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-nativ
 import RNFS from 'react-native-fs';
 import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
-// import useStoragePermission from '../hooks/useStoragePermission';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
 import { StateError } from '../types/reactTypes';
@@ -53,7 +52,6 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const [subDirectories, setSubDirectories] = useState<{ [path: string]: Dir[] }>({});
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
-	// const isStoragePermissionGranted = useStoragePermission();
 	const [selectedFiles, setSelectedFiles] = useState<{
 		[path: string]: Dir;
 	}>({});
@@ -187,7 +185,16 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 
 	return (
 		<ThemedView style={styles.container}>
-			{error && <Text>{error}</Text>}
+			<Text
+				style={{ color: 'green', backgroundColor: 'lightyellow' }}
+				numberOfLines={3}>
+				{currentPath.length + ' / ' + currentPath}
+			</Text>
+			{error && (
+				<Text style={{ color: 'green', backgroundColor: 'lightyellow' }}>
+					{error}
+				</Text>
+			)}
 			{loading && !refreshing && <ActivityIndicator />}
 			<View style={styles.headerContainer}>
 				<ThemedText style={styles.flatListTitle}>Music</ThemedText>

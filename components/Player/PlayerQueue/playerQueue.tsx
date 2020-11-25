@@ -4,8 +4,11 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 	StyleSheet,
+	View,
 } from 'react-native';
 import { Track } from 'react-native-track-player';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
+import Colors from '../../../constants/Colors';
 import Layout from '../../../constants/Layout';
 import Separator from '../../UI/Separator';
 import { Text as ThemedText } from '../../UI/Themed';
@@ -28,41 +31,57 @@ const PlayerQueue: React.FC<Props> = ({
 	return loading ? (
 		<ActivityIndicator />
 	) : (
-		<>
-			<ScrollView>
-				{queue.map((track) => {
-					return (
-						<React.Fragment key={track.id}>
-							<TouchableOpacity
-								onPress={() => onSongPress(track)}
-								onLongPress={() => onSongLongPress(track)}
-								style={styles.trackContainer}>
-								<ThemedText
-									style={[
-										styles.trackTitle,
-										{
-											fontWeight:
-												track.id === currentTrackId
-													? '700'
-													: 'normal',
-										},
-									]}>
-									{track.title}
-								</ThemedText>
-							</TouchableOpacity>
-							<Separator separatorStyle={styles.songSeparator} />
-						</React.Fragment>
-					);
-				})}
-			</ScrollView>
+		<View style={styles.container}>
+			{queue.length > 0 ? (
+				<ScrollView style={styles.list}>
+					{queue.map((track) => {
+						return (
+							<React.Fragment key={track.id}>
+								<TouchableOpacity
+									onPress={() => onSongPress(track)}
+									onLongPress={() => onSongLongPress(track)}
+									style={styles.trackContainer}>
+									<ThemedText
+										style={[
+											styles.trackTitle,
+											{
+												fontWeight:
+													track.id === currentTrackId
+														? '700'
+														: 'normal',
+											},
+										]}>
+										{track.title}
+									</ThemedText>
+								</TouchableOpacity>
+								<Separator separatorStyle={styles.songSeparator} />
+							</React.Fragment>
+						);
+					})}
+				</ScrollView>
+			) : (
+				<View style={styles.notTracksContainer}>
+					<FontAwesome5Icon
+						name="music"
+						color={Colors.colors.normal}
+						size={55}
+					/>
+				</View>
+			)}
 			<ThemedText style={styles.listInfo}>
 				Tracks in queue: {queue.length}
 			</ThemedText>
-		</>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+	list: {
+		flex: 1,
+	},
 	listInfo: {
 		fontStyle: 'italic',
 		textAlign: 'right',
@@ -82,6 +101,11 @@ const styles = StyleSheet.create({
 	},
 	songSeparator: {
 		alignSelf: 'center',
+	},
+	notTracksContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 });
 

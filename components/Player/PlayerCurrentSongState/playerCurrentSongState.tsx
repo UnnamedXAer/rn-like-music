@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
 	},
 	songTitle: {
 		fontSize: Layout.spacing(
-			Layout.deviceSize === 'tablet' ? 3 : Layout.deviceSize === 'small' ? 1.5 : 2,
+			Layout.deviceSize === 'tablet' ? 3 : Layout.deviceSize === 'small' ? 2 : 2.5,
 		),
 		textAlign: 'center',
 		fontWeight: 'bold',

@@ -1,8 +1,7 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
-import Button from '../components/UI/Button';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { View as ThemedView } from '../components/UI/Themed';
 import { TracksActionTypes, TracksContext } from '../context/tracksContext';
@@ -29,7 +28,7 @@ interface Props {
 	route: PlayScreenRouteProp;
 }
 
-const PlayScreen: React.FC<Props> = ({ navigation }) => {
+const PlayScreen: React.FC<Props> = () => {
 	const { isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
 	const [longPressedSong, setLongPressedSong] = useState<Track | null>(null);
@@ -127,9 +126,16 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	return (
 		<>
 			<ThemedView style={styles.container}>
-				<Button
-					onPress={() => navigation.navigate('Directories')}
-					title="Add Songs"
+				<PlayerQueue
+					queue={tracksState.queue}
+					currentTrackId={tracksState.currentTrack?.id}
+					loading={false}
+					onSongPress={queueItemPressHandler}
+					onSongLongPress={queueItemLongPressHandler}
+				/>
+				<PlayerCurrentSongState
+					currentTrack={tracksState.currentTrack}
+					onSeek={songSeekHandler}
 				/>
 				<PlayerActions
 					mainButtonAction={isPlaying ? 'pause' : 'play'}
@@ -137,38 +143,6 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					nextTrack={tracksState.nextTrack}
 					previousTrack={tracksState.previousTrack}
 					skipSong={skipSongHandler}
-				/>
-				<PlayerCurrentSongState
-					currentTrack={tracksState.currentTrack}
-					onSeek={songSeekHandler}
-				/>
-				<View>
-					<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-						<Button
-							size="small"
-							title="show queue"
-							onPress={updateSongList}
-							color="violet"
-						/>
-						<Button
-							size="small"
-							title="Reset queue"
-							onPress={() =>
-								TrackPlayer.reset().then(() =>
-									dispatchTracks({
-										type: TracksActionTypes.ResetQueue,
-									}),
-								)
-							}
-						/>
-					</View>
-				</View>
-				<PlayerQueue
-					queue={tracksState.queue}
-					currentTrackId={tracksState.currentTrack?.id}
-					loading={false}
-					onSongPress={queueItemPressHandler}
-					onSongLongPress={queueItemLongPressHandler}
 				/>
 			</ThemedView>
 			<QueueSongMenu

@@ -1,6 +1,7 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View } from 'react-native';
+import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import PlayScreen from '../screens/PlayScreen';
@@ -25,7 +26,24 @@ export default function RootStackNavigator() {
 					/>
 				),
 			}}>
-			<RootStack.Screen name="Play" component={PlayScreen} />
+			<RootStack.Screen
+				name="Play"
+				component={PlayScreen}
+				options={({ navigation }) => ({
+					headerRight: (props) => {
+						return (
+							<FontAwesome5Icon.Button
+								color={props.tintColor}
+								name="plus"
+								backgroundColor="transparent"
+								activeOpacity={0.4}
+								underlayColor={Colors[colorScheme].background}
+								onPress={() => navigation.push('Directories')}
+							/>
+						);
+					},
+				})}
+			/>
 			<RootStack.Screen
 				name="Directories"
 				options={{ title: 'Music' }}

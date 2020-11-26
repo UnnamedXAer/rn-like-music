@@ -19,6 +19,7 @@ import { playTrack } from '../trackPlayer/playerUtils';
 import { RouteProp } from '@react-navigation/native';
 import showToast from '../utils/showToast';
 import { INTERNAL_ERROR_MSG } from '../constants/strings';
+import Layout from '../constants/Layout';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -157,6 +158,9 @@ const PlayScreen: React.FC<Props> = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		paddingBottom: Layout.spacing(
+			Layout.deviceSize === 'tablet' ? 3 : Layout.deviceSize === 'large' ? 2 : 1,
+		),
 	},
 });
 export default PlayScreen;

@@ -31,33 +31,40 @@ const TrackPlayerProgress: React.FC<Props> = ({ disabled, onSeekComplete }) => {
 
 	const slidingCompleteHandler: SliderOnChangeCallback = async (slideValue) => {
 		const sliderPosition = slideValue[0];
-		console.log('seek to: ', secondsToMinutesString(sliderPosition));
 		onSeekComplete(sliderPosition);
 		setTimeout(() => {
 			// keep slider from jumping to start position
 			setIsSliding(false);
 			setValue(sliderPosition);
-		}, 501);
+		}, 750);
 	};
 
 	return (
 		<View style={styles.container}>
-			<View>
-				<Slider
-					value={value}
-					minimumValue={0}
-					maximumValue={trackDuration}
-					disabled={disabled}
-					onSlidingStart={() => {
-						setIsSliding(true);
-					}}
-					onValueChange={(slideValue) => setValue(slideValue[0])}
-					onSlidingComplete={slidingCompleteHandler}
-				/>
-			</View>
-			<View style={styles.timesContainer}>
-				<Text>{disabled ? '' : secondsToMinutesString(progress.position)}</Text>
-				<Text>{disabled ? '' : secondsToMinutesString(progress.duration)}</Text>
+			<View style={styles.sliderContainer}>
+				<View>
+					<Slider
+						value={value}
+						minimumValue={0}
+						maximumValue={trackDuration}
+						disabled={disabled}
+						onSlidingStart={() => {
+							setIsSliding(true);
+						}}
+						onValueChange={(slideValue) => setValue(slideValue[0])}
+						onSlidingComplete={slidingCompleteHandler}
+						trackStyle={styles.trackStyle}
+						thumbStyle={styles.thumbStyle}
+					/>
+				</View>
+				<View style={styles.timesContainer}>
+					<Text style={styles.timeText}>
+						{disabled ? '' : secondsToMinutesString(progress.position)}
+					</Text>
+					<Text style={styles.timeText}>
+						{disabled ? '' : secondsToMinutesString(progress.duration)}
+					</Text>
+				</View>
 			</View>
 		</View>
 	);
@@ -65,8 +72,13 @@ const TrackPlayerProgress: React.FC<Props> = ({ disabled, onSeekComplete }) => {
 
 const styles = StyleSheet.create({
 	container: {
+		alignItems: 'center',
+	},
+	sliderContainer: {
+		paddingBottom: Layout.spacing(Layout.deviceSize === 'tablet' ? 3 : 1.5),
 		position: 'relative',
-		paddingBottom: Layout.spacing(),
+		width: '100%',
+		maxWidth: 500,
 	},
 	timesContainer: {
 		bottom: 0,
@@ -76,6 +88,17 @@ const styles = StyleSheet.create({
 		paddingHorizontal: Layout.spacing(1),
 		flexDirection: 'row',
 		justifyContent: 'space-between',
+	},
+	timeText: {
+		fontSize: Layout.spacing(Layout.deviceSize === 'tablet' ? 3 : 1.5),
+	},
+	thumbStyle: {
+		height: Layout.spacing(Layout.deviceSize === 'tablet' ? 4 : 2),
+		width: Layout.spacing(Layout.deviceSize === 'tablet' ? 4 : 2),
+		borderRadius: Layout.spacing(Layout.deviceSize === 'tablet' ? 2 : 1),
+	},
+	trackStyle: {
+		height: Layout.spacing(Layout.deviceSize === 'tablet' ? 1 : 0.5),
 	},
 });
 export default TrackPlayerProgress;

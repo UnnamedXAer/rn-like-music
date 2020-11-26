@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
 	},
 	list: {
 		flex: 1,
+		elevation: 2,
 	},
 	listInfo: {
 		fontStyle: 'italic',
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
 		marginVertical: Layout.spacing(0.5),
 	},
 	trackTitle: {
-		fontSize: 14,
+		fontSize: Layout.deviceSize === 'tablet' ? 20 : 14,
 	},
 	songSeparator: {
 		alignSelf: 'center',

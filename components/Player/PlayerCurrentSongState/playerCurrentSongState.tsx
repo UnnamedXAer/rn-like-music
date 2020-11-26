@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
 		borderTopColor: Colors.colors.normal,
 		marginVertical: Layout.spacing(2),
 		marginHorizontal: Layout.spacing(2),
-		paddingTop: Layout.spacing(),
+		paddingTop: Layout.spacing(Layout.deviceSize === 'tablet' ? 3 : 1),
 		paddingHorizontal: Layout.spacing(2),
 	},
 	songTitle: {

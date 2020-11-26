@@ -38,6 +38,6 @@ const styles = StyleSheet.create({
 	text: {
 		textAlign: 'center',
 		fontSize:
-			Layout.deviceSize === 'tablet' ? 24 : Layout.deviceSize === 'small' ? 10 : 14,
+			Layout.deviceSize === 'tablet' ? 16 : Layout.deviceSize === 'small' ? 10 : 14,
 	},
 });

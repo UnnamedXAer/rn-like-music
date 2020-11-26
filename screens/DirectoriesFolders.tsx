@@ -21,6 +21,7 @@ import DirItemDialog, {
 import assertUnreachable from '../utils/assertUnreachable';
 import showToast from '../utils/showToast';
 import { INTERNAL_ERROR_MSG } from '../constants/strings';
+import { GlobalDirs } from '../types/types';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -49,6 +50,7 @@ const mapDirsToTracks = (dirs: Dir[]) =>
 const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const colorScheme = useColorScheme();
 	const [error, setError] = useState<StateError>(null);
+	const [mainDirectories, setMainDirectories] = useState<GlobalDirs | null>(null);
 	const [subDirectories, setSubDirectories] = useState<{ [path: string]: Dir[] }>({});
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
@@ -59,7 +61,10 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		[path: string]: boolean;
 	}>({});
 	const [queueUpdateInProgress, setQueueUpdateInProgress] = useState(false);
-	const [currentPath, setCurrentPath] = useState(RNFS.ExternalStorageDirectoryPath);
+	// const [currentPath, setCurrentPath] = useState<string | null>(null); //RNFS.ExternalStorageDirectoryPath
+	const [currentPath, setCurrentPath] = useState<string>(
+		RNFS.ExternalStorageDirectoryPath,
+	);
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
 	const { dispatchTracks } = useContext(TracksContext);
 
@@ -93,10 +98,35 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	}, []);
 
 	useEffect(() => {
-		if (subDirectories[currentPath] === undefined) {
+		if (/*currentPath !== null && */ subDirectories[currentPath] === undefined) {
 			loadDirectories(currentPath);
 		}
 	}, [currentPath, loadDirectories, subDirectories]);
+
+	useEffect(() => {
+		(async () => {
+			const dirs = await RNFS.getAllExternalFilesDirs();
+			const mainDirs: GlobalDirs = [];
+
+			for (let i = 0; i < dirs.length; i++) {
+				if (dirs[i].includes('storage/emulated')) {
+					mainDirs.push({
+						path: dirs[i],
+						name: 'Internal Storage',
+						type: 'disk',
+					});
+					continue;
+				}
+				mainDirs.push({
+					path: dirs[i],
+					name: 'SD Card' + (i === 0 ? '' : ' ' + i),
+					type: 'disk',
+				});
+			}
+
+			setMainDirectories(mainDirs);
+		})();
+	}, []);
 
 	const toggleSelectSong = async (dir: Dir) => {
 		if (dir.path.endsWith('.mp3') || dir.path.endsWith('.flac')) {
@@ -188,7 +218,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			<Text
 				style={{ color: 'green', backgroundColor: 'lightyellow' }}
 				numberOfLines={3}>
-				{currentPath.length + ' / ' + currentPath}
+				{currentPath?.length + ' / ' + currentPath}
 			</Text>
 			{error && (
 				<Text style={{ color: 'green', backgroundColor: 'lightyellow' }}>
@@ -206,18 +236,23 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				/>
 			</View>
 			<FlatList
-				data={subDirectories[currentPath]}
+				data={
+					// currentPath === null ? mainDirectories : subDirectories[currentPath]
+					subDirectories[currentPath]
+				}
 				stickyHeaderIndices={[0]}
 				ListHeaderComponent={() => (
 					<DirectoriesListHeader
-						currentPath={currentPath}
+						currentPath={currentPath !== null ? currentPath : ' XCV'}
 						onPress={setCurrentPath}
 					/>
 				)}
 				ItemSeparatorComponent={() => <DirItemSeparator />}
 				onRefresh={() => {
+					// if (currentPath !== null) {
 					setRefreshing(true);
 					loadDirectories(currentPath);
+					// }
 				}}
 				keyExtractor={(item) => item.path}
 				refreshing={refreshing}

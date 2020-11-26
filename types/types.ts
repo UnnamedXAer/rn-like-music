@@ -6,3 +6,11 @@ export type ShowToastOptions = {
 	devMessage?: any;
 	duration?: 'SHORT' | 'LONG';
 };
+
+export type MainDir = {
+	path: string;
+	name: string;
+	type: 'disk' | 'folder';
+};
+
+export type GlobalDirs = MainDir[];

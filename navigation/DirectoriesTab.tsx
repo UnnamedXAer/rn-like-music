@@ -35,11 +35,14 @@ const DirectoriesTabNavigator = () => {
 	}
 
 	return (
-		<DirectoriesTab.Navigator tabBarOptions={tabBarOptions}>
+		<DirectoriesTab.Navigator
+			tabBarOptions={tabBarOptions}
+			sceneContainerStyle={{
+				backgroundColor: Colors[colorScheme].background,
+			}}>
 			<DirectoriesTab.Screen
 				name="Folders"
 				options={{
-					// title: 'Folders',
 					tabBarIcon: ({ color, focused }) => (
 						<FontAwesome5
 							name="folder"

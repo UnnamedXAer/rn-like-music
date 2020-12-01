@@ -12,13 +12,14 @@ interface Props {
 
 const DirectoriesListHeader: React.FC<Props> = ({ onPress, currentPath }) => {
 	const pathParts = currentPath.split('/');
+
 	return (
 		<ThemedView style={styles.container}>
 			<View style={styles.containerOverlay} />
 			<ScrollView horizontal>
 				{pathParts.map((path, idx) => (
 					<TouchableOpacity
-						key={path}
+						key={path + idx}
 						style={styles.touchable}
 						onPress={() => {
 							const relativePath = [];

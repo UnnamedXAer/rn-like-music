@@ -6,7 +6,7 @@ import DirItemText from './dirItemText';
 
 interface Props {
 	item: Dir;
-	onDirPress: (dir: Dir) => Promise<void>;
+	onDirPress: (dir: Dir) => void;
 	onDirLongPress: (dir: Dir) => void;
 	loading: boolean | undefined;
 	color: string;

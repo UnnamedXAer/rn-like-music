@@ -63,10 +63,14 @@ const DirectoriesAllMusicFiles: React.FC<Props> = ({ navigation }) => {
 			<ThemedText>All music Files</ThemedText>
 			<ScrollView>
 				<ThemedText style={{ fontSize: 22 }}>
-					<ThemedText>{JSON.stringify(dirs, null, 2)}</ThemedText>
-					<ThemedText>{JSON.stringify(fsStat, null, 2)}</ThemedText>
+					<ThemedText>{dirs.join('\n\n')}</ThemedText>
 				</ThemedText>
 				<Separator />
+				<Separator />
+				<Separator />
+				<ThemedText style={{ fontSize: 22 }}>
+					<ThemedText>{JSON.stringify(fsStat, null, 2)}</ThemedText>
+				</ThemedText>
 				<Separator />
 				<Separator />
 				<ThemedText style={{ fontSize: 22 }}>

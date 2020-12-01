@@ -20,9 +20,9 @@ const PlayerContextProvider: React.FC = ({ children }) => {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackError], (ev) => {
-		if (ev.state === State.Playing) {
-			console.log('playing state changed: ', ev);
-		}
+		// if (ev.state === State.Playing) {
+		// 	console.log('playing state changed: ', ev);
+		// }
 		setIsPlaying(ev.state === State.Playing);
 		if (ev.type === Event.PlaybackError) {
 			setError(ev.type);

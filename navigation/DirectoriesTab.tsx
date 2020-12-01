@@ -40,7 +40,7 @@ const DirectoriesTabNavigator = () => {
 			sceneContainerStyle={{
 				backgroundColor: Colors[colorScheme].background,
 			}}>
-			<DirectoriesTab.Screen
+			{/* <DirectoriesTab.Screen
 				name="Folders"
 				options={{
 					tabBarIcon: ({ color, focused }) => (
@@ -52,8 +52,8 @@ const DirectoriesTabNavigator = () => {
 					),
 				}}
 				component={DirectoriesFolders}
-			/>
-			<DirectoriesTab.Screen name="All" component={DirectoriesAllMusicFiles} />
+			/> */}
+			{/* <DirectoriesTab.Screen name="All" component={DirectoriesAllMusicFiles} /> */}
 			<DirectoriesTab.Screen name="Playlists" component={DirectoriesPlaylists} />
 		</DirectoriesTab.Navigator>
 	);

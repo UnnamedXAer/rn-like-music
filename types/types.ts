@@ -7,10 +7,4 @@ export type ShowToastOptions = {
 	duration?: 'SHORT' | 'LONG';
 };
 
-export type MainDir = {
-	path: string;
-	name: string;
-	type: 'disk' | 'folder';
-};
-
-export type GlobalDirs = MainDir[];
+export type MainDirType = 'sd-card' | 'disk' | 'folder';

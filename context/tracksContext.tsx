@@ -4,17 +4,7 @@ import TrackPlayer, {
 	Track,
 	useTrackPlayerEvents,
 } from 'react-native-track-player';
-
-type ActionMap<M extends { [key: string]: any }> = {
-	[Key in keyof M]: M[Key] extends undefined
-		? {
-				type: Key;
-		  }
-		: {
-				type: Key;
-				payload: M[Key];
-		  };
-};
+import { ContextActionMap } from '../types/reactTypes';
 
 export type TracksState = {
 	queue: Track[];
@@ -46,7 +36,9 @@ type ActionPayload = {
 	[TracksActionTypes.ResetQueue]: undefined;
 };
 
-type TracksActions = ActionMap<ActionPayload>[keyof ActionMap<ActionPayload>];
+type TracksActions = ContextActionMap<ActionPayload>[keyof ContextActionMap<
+	ActionPayload
+>];
 
 const reducer = (state: TracksState, action: TracksActions): TracksState => {
 	switch (action.type) {

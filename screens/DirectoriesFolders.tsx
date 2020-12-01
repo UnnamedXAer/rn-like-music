@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import RNFS from 'react-native-fs';
-import TrackPlayer, { Track, TrackType } from 'react-native-track-player';
+import TrackPlayer, { Track } from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
@@ -21,7 +21,8 @@ import DirItemDialog, {
 import assertUnreachable from '../utils/assertUnreachable';
 import showToast from '../utils/showToast';
 import { INTERNAL_ERROR_MSG } from '../constants/strings';
-import { GlobalDirs } from '../types/types';
+import MainDir from '../models/mainDir';
+import { mapDirsToTracks, mapSelectedFilesToTracks } from '../utils/mapData';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -29,28 +30,10 @@ interface Props {
 	navigation: ScreenNavigationProp;
 }
 
-const mapSelectedFilesToTracks = (selectedFiles: { [path: string]: Dir }) => {
-	const dirs = Object.values(selectedFiles);
-	const tracks = mapDirsToTracks(dirs);
-	return tracks;
-};
-
-const mapDirsToTracks = (dirs: Dir[]) =>
-	dirs.map(
-		(dir) =>
-			({
-				url: 'file://' + dir.path,
-				title: dir.name,
-				id: dir.path,
-				type: TrackType.Default,
-				artist: 'artist: ' + dir.name,
-			} as Track),
-	);
-
 const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const colorScheme = useColorScheme();
 	const [error, setError] = useState<StateError>(null);
-	const [mainDirectories, setMainDirectories] = useState<GlobalDirs | null>(null);
+	const [mainDirectories, setMainDirectories] = useState<MainDir[]>([]);
 	const [subDirectories, setSubDirectories] = useState<{ [path: string]: Dir[] }>({});
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
@@ -106,22 +89,22 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	useEffect(() => {
 		(async () => {
 			const dirs = await RNFS.getAllExternalFilesDirs();
-			const mainDirs: GlobalDirs = [];
-
+			const mainDirs: MainDir[] = [];
+			let sdCardCnt = 0;
 			for (let i = 0; i < dirs.length; i++) {
-				if (dirs[i].includes('storage/emulated')) {
-					mainDirs.push({
-						path: dirs[i],
-						name: 'Internal Storage',
-						type: 'disk',
-					});
+				const dir = dirs[i];
+				if (dir.includes('storage/emulated')) {
+					mainDirs.push(new MainDir(dir, 'Internal Storage', 'disk'));
 					continue;
 				}
-				mainDirs.push({
-					path: dirs[i],
-					name: 'SD Card' + (i === 0 ? '' : ' ' + i),
-					type: 'disk',
-				});
+				mainDirs.push(
+					new MainDir(
+						dir,
+						'SD Card' + (sdCardCnt === 0 ? '' : ' ' + sdCardCnt),
+						'disk',
+					),
+				);
+				sdCardCnt++;
 			}
 
 			setMainDirectories(mainDirs);

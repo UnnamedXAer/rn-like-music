@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
+import DirectoriesContextProvider from './context/directoriesContext';
 import PlayerContextProvider from './context/playerContext';
 import TracksContextProvider from './context/tracksContext';
 
@@ -30,11 +31,13 @@ const App = () => {
 	}
 
 	return (
-		<PlayerContextProvider>
-			<TracksContextProvider>
-				<Navigator />
-			</TracksContextProvider>
-		</PlayerContextProvider>
+		<DirectoriesContextProvider>
+			<PlayerContextProvider>
+				<TracksContextProvider>
+					<Navigator />
+				</TracksContextProvider>
+			</PlayerContextProvider>
+		</DirectoriesContextProvider>
 	);
 };
 

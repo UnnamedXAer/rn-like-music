@@ -1,6 +1,6 @@
 import RNFS from 'react-native-fs';
 import Dir from '../../models/dir';
-import { extractPrettyPathPrefixes } from './extractPrettyPathPrefixes';
+import { extractPrettyPathPrefixes } from './prettyPathPrefixes';
 
 const loopThroughDirs = async (path: string) => {
 	const dirs = await RNFS.readDir(path);
@@ -12,13 +12,11 @@ const loopThroughDirs = async (path: string) => {
 				console.log('NO DIR', dir);
 				continue;
 			}
-			const dirPath = dir.path.startsWith('/storage/emulated/0')
-				? dir.path.replace('/storage/emulated/0', '/Device/Internal Storage')
-				: dir.path;
+
 			elements.push(
 				new Dir(
 					dir.path,
-					dirPath,
+					'',
 					dir.name,
 					+dir.size,
 					dir.isDirectory(),
@@ -70,7 +68,7 @@ export const getDirSongs = async (path: string) => {
 	return songs;
 };
 
-export const getMainDirs = async () => {
+export const getMainDirsAndPrettyPrefixes = async () => {
 	const dirs = await RNFS.getAllExternalFilesDirs();
 
 	const prettyPathPrefixes = extractPrettyPathPrefixes(dirs);
@@ -84,15 +82,15 @@ export const getMainDirs = async () => {
 		dir = dir.substring(0, idx);
 		if (isInternalStorage) {
 			const dirName = 'Internal Storage';
-			dir = `/Device/${dirName}`;
+			const prettyDir = `/Device/${dirName}`;
 
-			mainDirs.push(new Dir(dirs[i], dir, dirName, 0, true, false));
+			mainDirs.push(new Dir(dir, prettyDir, dirName, 0, true, false));
 			continue;
 		}
 		const dirName = 'SD Card' + (sdCardCnt === 0 ? '' : ' ' + sdCardCnt);
-		dir = `/Device/${dirName}`;
+		const prettyDir = `/Device/${dirName}`;
 
-		mainDirs.push(new Dir(dirs[i], dir, dirName, 0, true, false));
+		mainDirs.push(new Dir(dir, prettyDir, dirName, 0, true, false));
 		sdCardCnt++;
 	}
 	return { mainDirs, prettyPathPrefixes };

@@ -31,7 +31,7 @@ interface Props {
 	navigation: ScreenNavigationProp;
 }
 
-const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
+const DirectoriesPlaylists: React.FC<Props> = ({ navigation }) => {
 	const colorScheme = useColorScheme();
 	const [selectedFiles, setSelectedFiles] = useState<{
 		[path: string]: Dir;
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default DirectoriesFolders;
+export default DirectoriesPlaylists;

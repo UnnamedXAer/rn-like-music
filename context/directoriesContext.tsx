@@ -1,9 +1,13 @@
 import React, { useEffect, useReducer } from 'react';
 import Dir from '../models/dir';
 import { ContextActionMap, PrettyPathPrefixes } from '../types/reactTypes';
-import { getMainDirs, readStorage } from '../utils/storage/externalStorage';
+import {
+	getMainDirsAndPrettyPrefixes,
+	readStorage,
+} from '../utils/storage/externalStorage';
 import showToast from '../utils/showToast';
 import { BASE_PATH } from '../constants/strings';
+import { getPathByPrettyPath } from '../utils/storage/prettyPathPrefixes';
 
 export type DirectoriesState = {
 	loading: boolean;
@@ -56,11 +60,12 @@ const reducer = (
 				...state,
 				loading: action.payload,
 			};
-		case DirectoriesActionTypes.SetCurrentDir:
+		case DirectoriesActionTypes.SetCurrentDir: {
 			return {
 				...state,
 				currentPath: action.payload,
 			};
+		}
 		case DirectoriesActionTypes.SetMainDirectories:
 			return {
 				...state,
@@ -84,6 +89,7 @@ const reducer = (
 			const updatedState: DirectoriesState = {
 				...(__DEV__ ? initialState : state),
 				subDirectories: { [BASE_PATH]: [...state.subDirectories[BASE_PATH]!] },
+				prettyPathPrefixes: { ...state.prettyPathPrefixes },
 			};
 			return updatedState;
 		}
@@ -110,8 +116,13 @@ const DirectoriesContextProvider: React.FC = ({ children }) => {
 			payload: true,
 		});
 
-		getMainDirs()
-			.then((mainDirs) => {
+		getMainDirsAndPrettyPrefixes()
+			.then((mainDirsAndPrefixes) => {
+				const { mainDirs, prettyPathPrefixes } = mainDirsAndPrefixes;
+				dispatch({
+					type: DirectoriesActionTypes.SetPrettyPathPrefixes,
+					payload: prettyPathPrefixes,
+				});
 				dispatch({
 					type: DirectoriesActionTypes.SetDirectories,
 					payload: { dirs: mainDirs, path: BASE_PATH },
@@ -123,13 +134,17 @@ const DirectoriesContextProvider: React.FC = ({ children }) => {
 	}, []);
 
 	useEffect(() => {
-		if (state.currentPath !== BASE_PATH && !state.subDirectories[state.currentPath]) {
-			readStorage(state.currentPath)
+		const prettyPath = state.currentPath;
+		if (prettyPath !== BASE_PATH && !state.subDirectories[prettyPath]) {
+			const path = getPathByPrettyPath(prettyPath, state.prettyPathPrefixes);
+			readStorage(path)
 				.then((dirs) => {
+					dirs.forEach((dir) => (dir.prettyPath = prettyPath + '/' + dir.name));
+
 					dispatch({
 						type: DirectoriesActionTypes.SetDirectories,
 						payload: {
-							path: state.currentPath,
+							path: prettyPath,
 							dirs,
 						},
 					});
@@ -138,7 +153,7 @@ const DirectoriesContextProvider: React.FC = ({ children }) => {
 					showToast('Fail to read device files storage.', err.message);
 				});
 		}
-	}, [state.currentPath, state.subDirectories]);
+	}, [state.currentPath, state.prettyPathPrefixes, state.subDirectories]);
 
 	return (
 		<DirectoriesContext.Provider

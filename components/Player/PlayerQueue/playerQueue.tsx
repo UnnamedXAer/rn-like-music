@@ -17,6 +17,7 @@ interface Props {
 	queue: Track[];
 	onSongPress: (track: Track) => Promise<void>;
 	onSongLongPress: (track: Track) => Promise<void>;
+	onNoSongPress: () => void;
 	currentTrackId: Track['id'] | undefined;
 	loading: boolean;
 }
@@ -26,6 +27,7 @@ const PlayerQueue: React.FC<Props> = ({
 	queue,
 	onSongPress,
 	onSongLongPress,
+	onNoSongPress,
 	loading,
 }) => {
 	return loading ? (
@@ -60,13 +62,15 @@ const PlayerQueue: React.FC<Props> = ({
 					})}
 				</ScrollView>
 			) : (
-				<View style={styles.notTracksContainer}>
+				<TouchableOpacity
+					style={styles.notTracksContainer}
+					onPress={onNoSongPress}>
 					<FontAwesome5Icon
 						name="music"
 						color={Colors.colors.normal}
 						size={55}
 					/>
-				</View>
+				</TouchableOpacity>
 			)}
 			<ThemedText style={styles.listInfo}>
 				Tracks in queue: {queue.length}

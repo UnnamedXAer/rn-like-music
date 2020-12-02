@@ -29,7 +29,7 @@ interface Props {
 	route: PlayScreenRouteProp;
 }
 
-const PlayScreen: React.FC<Props> = () => {
+const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const { isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
 	const [longPressedSong, setLongPressedSong] = useState<Track | null>(null);
@@ -133,6 +133,9 @@ const PlayScreen: React.FC<Props> = () => {
 					loading={false}
 					onSongPress={queueItemPressHandler}
 					onSongLongPress={queueItemLongPressHandler}
+					onNoSongPress={() => {
+						navigation.navigate('Directories');
+					}}
 				/>
 				<PlayerCurrentSongState
 					currentTrack={tracksState.currentTrack}

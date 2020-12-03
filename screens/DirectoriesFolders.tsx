@@ -192,6 +192,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 						onDirLongPress={directoryItemLongPressHandler}
 						onDirPress={directoryItemPressHandler}
 						color={Colors[colorScheme].text}
+						isSelected={selectedFiles[item.path] !== undefined}
 					/>
 				)}
 			/>

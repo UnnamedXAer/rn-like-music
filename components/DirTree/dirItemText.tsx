@@ -11,16 +11,29 @@ interface Props {
 	onLongPress: () => void;
 	color: string;
 	loading: undefined | boolean;
+	isSelected: boolean;
 }
 
-const DirItemText: React.FC<Props> = ({ onPress, onLongPress, item, color, loading }) => {
+const DirItemText: React.FC<Props> = ({
+	onPress,
+	onLongPress,
+	item,
+	color,
+	loading,
+	isSelected,
+}) => {
 	return (
 		<TouchableOpacity
 			onPress={onPress}
 			style={styles.touchable}
 			onLongPress={onLongPress}>
 			<>
-				<DirIcon dir={item} loading={loading} color={color} />
+				<DirIcon
+					dir={item}
+					loading={loading}
+					color={color}
+					isSelected={isSelected}
+				/>
 				<Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
 					{item.name}
 				</Text>

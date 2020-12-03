@@ -10,6 +10,7 @@ interface Props {
 	onDirLongPress: (dir: Dir) => void;
 	loading: boolean | undefined;
 	color: string;
+	isSelected: boolean;
 }
 
 export default function DirRenderItem({
@@ -18,6 +19,7 @@ export default function DirRenderItem({
 	onDirLongPress,
 	loading,
 	color,
+	isSelected,
 }: Props) {
 	return (
 		<View style={[styles.container]}>
@@ -31,6 +33,7 @@ export default function DirRenderItem({
 				loading={loading}
 				color={color}
 				item={item}
+				isSelected={isSelected}
 			/>
 		</View>
 	);

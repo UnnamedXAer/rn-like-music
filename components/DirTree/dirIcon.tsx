@@ -8,11 +8,14 @@ interface Props {
 	dir: Dir;
 	loading: boolean | undefined;
 	color: string;
+	isSelected: boolean;
 }
 
-const DirIcon: React.FC<Props> = ({ dir, loading, color }) => {
+const DirIcon: React.FC<Props> = ({ dir, loading, color, isSelected }) => {
 	let iconName = 'file';
-	if (dir.isDirectory) {
+	if (isSelected) {
+		iconName = 'check';
+	} else if (dir.isDirectory) {
 		iconName = 'folder-open';
 	} else if (dir.isFile) {
 		if (/\.mp3/.test(dir.name)) {

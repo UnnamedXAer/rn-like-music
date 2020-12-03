@@ -152,6 +152,13 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const updateQueueHandler = async () => {
 		setQueueUpdateInProgress(true);
 		const tracks = mapSelectedFilesToTracks(selectedFiles);
+		if (tracks.length === 0) {
+			setQueueUpdateInProgress(false);
+			return showToast(
+				'You did not choose any music to play.',
+				'"selectedFiles" is empty.',
+			);
+		}
 		await addTracksToQueue(tracks, true);
 	};
 

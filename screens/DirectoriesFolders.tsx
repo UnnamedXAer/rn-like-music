@@ -36,9 +36,6 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const [selectedFiles, setSelectedFiles] = useState<{
 		[path: string]: Dir;
 	}>({});
-	const [loadingDirs, setLoadingDirs] = useState<{
-		[path: string]: boolean;
-	}>({});
 	const [queueUpdateInProgress, setQueueUpdateInProgress] = useState(false);
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
 	const { dispatchTracks } = useContext(TracksContext);
@@ -187,7 +184,6 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				bounces
 				renderItem={({ item }) => (
 					<DirRenderItem
-						loading={loadingDirs[item.path]}
 						item={item}
 						onDirLongPress={directoryItemLongPressHandler}
 						onDirPress={directoryItemPressHandler}

@@ -24,6 +24,7 @@ export enum DirectoriesActionTypes {
 	SetCurrentDir = 'SET_CURRENT_DIR',
 	ResetState = 'RESET_STATE',
 	SetPrettyPathPrefixes = 'SET_PRETTY_PATH_PREFIXES',
+	GoBack = 'GO_BACK',
 }
 
 const initialState: DirectoriesState = {
@@ -44,6 +45,7 @@ type ActionPayload = {
 	[DirectoriesActionTypes.SetCurrentDir]: string;
 	[DirectoriesActionTypes.ResetState]: undefined;
 	[DirectoriesActionTypes.SetPrettyPathPrefixes]: PrettyPathPrefixes;
+	[DirectoriesActionTypes.GoBack]: undefined;
 };
 
 type DirectoriesActions = ContextActionMap<ActionPayload>[keyof ContextActionMap<
@@ -64,6 +66,18 @@ const reducer = (
 			return {
 				...state,
 				currentPath: action.payload,
+			};
+		}
+		case DirectoriesActionTypes.GoBack: {
+			if (state.currentPath === BASE_PATH) {
+				return state;
+			}
+			const pathElements = state.currentPath.split('/');
+			pathElements.pop();
+			const updatedPath = pathElements.join('/');
+			return {
+				...state,
+				currentPath: updatedPath,
 			};
 		}
 		case DirectoriesActionTypes.SetMainDirectories:
@@ -108,8 +122,8 @@ export const DirectoriesContext = React.createContext<{
 
 const DirectoriesContextProvider: React.FC = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
-	console.log('Current dir', state.currentPath);
-	console.log('Sub directories: ', state.subDirectories);
+	// console.log('Current dir', state.currentPath);
+	// console.log('Sub directories: ', state.subDirectories);
 	useEffect(() => {
 		dispatch({
 			type: DirectoriesActionTypes.SetLoading,

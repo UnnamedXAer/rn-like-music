@@ -1,5 +1,12 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+	View,
+	Text,
+	FlatList,
+	StyleSheet,
+	ActivityIndicator,
+	BackHandler,
+} from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
@@ -18,7 +25,7 @@ import DirItemDialog, {
 } from '../components/DirTree/DirTreeItemDialog/dirItemDialog';
 import assertUnreachable from '../utils/assertUnreachable';
 import showToast from '../utils/showToast';
-import { INTERNAL_ERROR_MSG } from '../constants/strings';
+import { BASE_PATH, INTERNAL_ERROR_MSG } from '../constants/strings';
 import { mapDirsToTracks, mapSelectedFilesToTracks } from '../utils/mapData';
 import {
 	DirectoriesActionTypes,
@@ -40,6 +47,24 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
 	const { dispatchTracks } = useContext(TracksContext);
 	const { directoriesState, dispatchDirectories } = useContext(DirectoriesContext);
+
+	useEffect(() => {
+		const backAction = () => {
+			if (directoriesState.currentPath === BASE_PATH) {
+				return false;
+			}
+			dispatchDirectories({
+				type: DirectoriesActionTypes.GoBack,
+			});
+			return true;
+		};
+
+		const handler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+		return () => {
+			handler.remove();
+		};
+	}, [directoriesState.currentPath, dispatchDirectories]);
 
 	const toggleSelectSong = async (dir: Dir) => {
 		if (dir.path.endsWith('.mp3') || dir.path.endsWith('.flac')) {

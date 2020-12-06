@@ -1,5 +1,5 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, Alert } from 'react-native';
 import TrackPlayer, { Track } from 'react-native-track-player';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
@@ -20,6 +20,8 @@ import { RouteProp } from '@react-navigation/native';
 import showToast from '../utils/showToast';
 import { INTERNAL_ERROR_MSG } from '../constants/strings';
 import Layout from '../constants/Layout';
+import { PlayerAdditionalPropAction } from '../components/Player/PlayerAdditionalActionButton/PlayerAdditionalActionButton';
+import Dir from '../models/dir';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
 
@@ -32,26 +34,24 @@ interface Props {
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const { isPlaying } = useContext(PlayerContext);
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
-	const [longPressedSong, setLongPressedSong] = useState<Track | null>(null);
+	const [longPressedSong, setLongPressedSong] = useState<Dir | null>(null);
 
-	const updateSongList = useCallback(() => {
-		TrackPlayer.getQueue().then((_queue) => {
-			dispatchTracks({
-				type: TracksActionTypes.SetQueue,
-				payload: _queue,
-			});
-		});
-	}, [dispatchTracks]);
-
-	useEffect(() => {
-		updateSongList();
-	}, [updateSongList]);
-
-	const mainButtonPressHandler = () => {
-		if (!isPlaying) {
-			TrackPlayer.play();
-		} else {
-			TrackPlayer.pause();
+	const mainButtonPressHandler = async () => {
+		if (tracksState.currentTrack === null) {
+			showToast('Queue is empty.');
+			navigation.navigate('Directories');
+		}
+		try {
+			if (!isPlaying) {
+				await TrackPlayer.play();
+			} else {
+				await TrackPlayer.pause();
+			}
+		} catch (err) {
+			showToast(
+				INTERNAL_ERROR_MSG,
+				`Fail to ${isPlaying ? 'pause' : 'play'}.\n` + err.message,
+			);
 		}
 	};
 
@@ -80,12 +80,12 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
-	const queueItemPressHandler = (track: Track) => {
-		return playTrack(track, tracksState.currentTrack, isPlaying);
+	const queueItemPressHandler = (dir: Dir) => {
+		return playTrack(dir, tracksState.currentTrack, isPlaying);
 	};
 
-	const queueItemLongPressHandler = async (track: Track) => {
-		setLongPressedSong(track);
+	const queueItemLongPressHandler = async (dir: Dir) => {
+		setLongPressedSong(dir);
 	};
 	const queueMenuItemPressHandler = async (option: QueueSongOptionsOption) => {
 		if (longPressedSong === null) {
@@ -98,10 +98,32 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					playTrack(longPressedSong, tracksState.currentTrack, isPlaying);
 					break;
 				case 'REMOVE_FROM_QUEUE':
-					await TrackPlayer.remove(longPressedSong);
+					try {
+						const tract = await TrackPlayer.getTrack(longPressedSong.path);
+						if (tract.id === tracksState.currentTrack?.path) {
+							await TrackPlayer.stop();
+							if (tracksState.nextTrack) {
+								await TrackPlayer.skip(tracksState.nextTrack?.path);
+							}
+						}
+						console.log('about to remove track: ', tract);
+						await TrackPlayer.remove([(tract.id as unknown) as Track]);
+						dispatchTracks({
+							type: TracksActionTypes.UpdateQueue,
+							payload: {
+								remove: [longPressedSong.path],
+							},
+						});
+						showToast('track removed', tract.title);
+					} catch (err) {
+						showToast(
+							'Fail to remove track: ' + longPressedSong.name,
+							err.message,
+						);
+					}
 					break;
 				case 'SHOW_INFO':
-					const info = await getDirInfo(longPressedSong.id);
+					const info = await getDirInfo(longPressedSong.path);
 					Alert.alert(JSON.stringify(info, null, '\t'));
 					break;
 				default:
@@ -124,12 +146,20 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
+	const additionalPlayerPropActionHandler: PlayerAdditionalPropAction = (action) => {
+		let dispatchActionType = TracksActionTypes.TogglePlayRandomly;
+		if (action === 'repeat-queue') {
+			dispatchActionType = TracksActionTypes.ToggleRepeatQueue;
+		}
+		dispatchTracks({ type: dispatchActionType });
+	};
+
 	return (
 		<>
 			<ThemedView style={styles.container}>
 				<PlayerQueue
 					queue={tracksState.queue}
-					currentTrackId={tracksState.currentTrack?.id}
+					currentTrackId={tracksState.currentTrack?.path}
 					loading={false}
 					onSongPress={queueItemPressHandler}
 					onSongLongPress={queueItemLongPressHandler}
@@ -147,6 +177,9 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					nextTrack={tracksState.nextTrack}
 					previousTrack={tracksState.previousTrack}
 					skipSong={skipSongHandler}
+					playRandomly={tracksState.playRandomly}
+					repeatQueue={tracksState.repeatQueue}
+					additionalPlayerPropAction={additionalPlayerPropActionHandler}
 				/>
 			</ThemedView>
 			<QueueSongMenu

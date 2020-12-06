@@ -119,7 +119,7 @@ const DirectoriesPlaylists: React.FC<Props> = ({ navigation }) => {
 				await TrackPlayer.reset();
 			}
 			await TrackPlayer.add(tracks);
-			dispatchTracks({ type: TracksActionTypes.SetQueue, payload: tracks });
+			dispatchTracks({ type: TracksActionTypes.UpdateQueue, payload: tracks });
 			await TrackPlayer.play();
 			navigation.navigate('Play');
 		} catch (err) {
@@ -182,7 +182,7 @@ const DirectoriesPlaylists: React.FC<Props> = ({ navigation }) => {
 				bounces
 				renderItem={({ item }) => (
 					<DirRenderItem
-						loading={loadingDirs[item.path]}
+						isSelected={selectedFiles[item.path] !== null}
 						item={item}
 						onDirLongPress={directoryItemLongPressHandler}
 						onDirPress={directoryItemPressHandler}

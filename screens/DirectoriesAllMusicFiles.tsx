@@ -34,27 +34,27 @@ const DirectoriesAllMusicFiles: React.FC<Props> = ({ navigation }) => {
 	const [fsStat, setFsStat] = useState<any>(null);
 	const [content, setContent] = useState({});
 
-	const loadData = useCallback(async () => {
-		// cons
-		try {
-			const data = await RNFS.getAllExternalFilesDirs();
-			setDirs(data);
+	// const loadData = useCallback(async () => {
+	// 	// cons
+	// 	try {
+	// 		const data = await RNFS.getAllExternalFilesDirs();
+	// 		setDirs(data);
 
-			const data2 = await RNFS.stat('/storage');
-			const data3 = await RNFS.stat('/storage/emulated');
-			const data4 = await RNFS.stat('/storage/emulated/0');
-			setFsStat({ data2, data3, data4 });
+	// 		const data2 = await RNFS.stat('/storage');
+	// 		const data3 = await RNFS.stat('/storage/emulated');
+	// 		const data4 = await RNFS.stat('/storage/emulated/0');
+	// 		setFsStat({ data2, data3, data4 });
 
-			const data5 = await RNFS.readDir('/storage');
-			setContent(data5);
-		} catch (err) {
-			showToast('', err.message);
-		}
-	}, []);
+	// 		const data5 = await RNFS.readDir('/storage');
+	// 		setContent(data5);
+	// 	} catch (err) {
+	// 		showToast('AllMusicDirs', err.message);
+	// 	}
+	// }, []);
 
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
+	// useEffect(() => {
+	// 	loadData();
+	// }, [loadData]);
 
 	return (
 		<ThemedView style={styles.container}>

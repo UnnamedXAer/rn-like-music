@@ -6,8 +6,6 @@ import {
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { DirectoriesTabParamList } from './types/DirectoriesTabNavigatorTypes';
 import DirectoriesFolders from '../screens/DirectoriesFolders';
-import DirectoriesAllMusicFiles from '../screens/DirectoriesAllMusicFiles';
-import DirectoriesPlaylists from '../screens/DirectoriesPlaylists';
 import useColorScheme from '../hooks/useColorScheme';
 import Colors from '../constants/Colors';
 
@@ -53,8 +51,8 @@ const DirectoriesTabNavigator = () => {
 				}}
 				component={DirectoriesFolders}
 			/>
-			<DirectoriesTab.Screen name="All" component={DirectoriesAllMusicFiles} />
-			<DirectoriesTab.Screen name="Playlists" component={DirectoriesPlaylists} />
+			{/* <DirectoriesTab.Screen name="All" component={DirectoriesAllMusicFiles} />
+			<DirectoriesTab.Screen name="Playlists" component={DirectoriesPlaylists} /> */}
 		</DirectoriesTab.Navigator>
 	);
 };

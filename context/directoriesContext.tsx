@@ -122,8 +122,7 @@ export const DirectoriesContext = React.createContext<{
 
 const DirectoriesContextProvider: React.FC = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
-	// console.log('Current dir', state.currentPath);
-	// console.log('Sub directories: ', state.subDirectories);
+
 	useEffect(() => {
 		dispatch({
 			type: DirectoriesActionTypes.SetLoading,

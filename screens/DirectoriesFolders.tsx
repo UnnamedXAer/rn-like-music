@@ -7,7 +7,7 @@ import {
 	ActivityIndicator,
 	BackHandler,
 } from 'react-native';
-import TrackPlayer, { Track } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
@@ -26,7 +26,7 @@ import DirItemDialog, {
 import assertUnreachable from '../utils/assertUnreachable';
 import showToast from '../utils/showToast';
 import { BASE_PATH, INTERNAL_ERROR_MSG } from '../constants/strings';
-import { mapDirsToTracks, mapSelectedFilesToTracks } from '../utils/mapData';
+import { mapDirsToTracks } from '../utils/mapData';
 import {
 	DirectoriesActionTypes,
 	DirectoriesContext,
@@ -77,7 +77,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				return { ...prevState, [dir.path]: dir };
 			});
 		} else {
-			showToast('Alert', dir.name + ' is not a mp3 file.');
+			showToast(dir.name + ' is not a mp3 file.');
 		}
 	};
 
@@ -113,7 +113,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			case 'PLAY': {
 				try {
 					const songs = await getDirSongs(longPressedDir.path);
-					addTracksToQueue(mapDirsToTracks(songs), true);
+					addTracksToQueue(songs, true);
 				} catch (err) {
 					console.log('err', err);
 					showToast({
@@ -134,14 +134,18 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		setLongPressedDir(null);
 	};
 
-	const addTracksToQueue = async (tracks: Track[], resetQueue: boolean) => {
+	const addTracksToQueue = async (dirs: Dir[], resetQueue: boolean) => {
+		const tracks = mapDirsToTracks(dirs);
 		try {
 			if (resetQueue === true) {
 				await TrackPlayer.reset();
 			}
 			await TrackPlayer.add(tracks);
-			dispatchTracks({ type: TracksActionTypes.SetQueue, payload: tracks });
 			await TrackPlayer.play();
+			dispatchTracks({
+				type: TracksActionTypes.UpdateQueue,
+				payload: { reset: resetQueue, add: dirs },
+			});
 			navigation.navigate('Play');
 		} catch (err) {
 			showToast(INTERNAL_ERROR_MSG, err.message);
@@ -151,15 +155,15 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 
 	const updateQueueHandler = async () => {
 		setQueueUpdateInProgress(true);
-		const tracks = mapSelectedFilesToTracks(selectedFiles);
-		if (tracks.length === 0) {
+		const songs = Object.values(selectedFiles);
+		if (songs.length === 0) {
 			setQueueUpdateInProgress(false);
 			return showToast(
 				'You did not choose any music to play.',
 				'"selectedFiles" is empty.',
 			);
 		}
-		await addTracksToQueue(tracks, true);
+		await addTracksToQueue(songs, true);
 	};
 
 	const listHeaderPressHandler = (path: string) => {

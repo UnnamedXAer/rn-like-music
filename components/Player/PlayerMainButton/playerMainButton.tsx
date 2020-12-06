@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableHighlight } from 'react-native';
 import Colors from '../../../constants/Colors';
-import Layout from '../../../constants/Layout';
 import { PlayerAction } from '../../../types/types';
 import { getMainBtnContainerSize } from '../../../utils/getMainBtnSize';
 import PlayerMainButtonPauseIcon from './PlayerMainButtonPauseIcon/playerMainButtonPauseIcon';

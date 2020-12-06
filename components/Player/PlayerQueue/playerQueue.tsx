@@ -6,24 +6,24 @@ import {
 	StyleSheet,
 	View,
 } from 'react-native';
-import { Track } from 'react-native-track-player';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Colors from '../../../constants/Colors';
 import Layout from '../../../constants/Layout';
+import Dir from '../../../models/dir';
 import Separator from '../../UI/Separator';
 import { Text as ThemedText } from '../../UI/Themed';
 
 interface Props {
-	queue: Track[];
-	onSongPress: (track: Track) => Promise<void>;
-	onSongLongPress: (track: Track) => Promise<void>;
+	queue: Dir[];
+	onSongPress: (track: Dir) => Promise<void>;
+	onSongLongPress: (track: Dir) => Promise<void>;
 	onNoSongPress: () => void;
-	currentTrackId: Track['id'] | undefined;
+	currentTrackId: Dir['path'] | undefined;
 	loading: boolean;
 }
 
 const PlayerQueue: React.FC<Props> = ({
-	currentTrackId,
+	currentTrackId: currentTrackPath,
 	queue,
 	onSongPress,
 	onSongLongPress,
@@ -36,24 +36,24 @@ const PlayerQueue: React.FC<Props> = ({
 		<View style={styles.container}>
 			{queue.length > 0 ? (
 				<ScrollView style={styles.list}>
-					{queue.map((track) => {
+					{queue.map((dir) => {
 						return (
-							<React.Fragment key={track.id}>
+							<React.Fragment key={dir.path}>
 								<TouchableOpacity
-									onPress={() => onSongPress(track)}
-									onLongPress={() => onSongLongPress(track)}
+									onPress={() => onSongPress(dir)}
+									onLongPress={() => onSongLongPress(dir)}
 									style={styles.trackContainer}>
 									<ThemedText
 										style={[
 											styles.trackTitle,
 											{
 												fontWeight:
-													track.id === currentTrackId
+													dir.path === currentTrackPath
 														? '700'
 														: 'normal',
 											},
 										]}>
-										{track.title}
+										{dir.name}
 									</ThemedText>
 								</TouchableOpacity>
 								<Separator separatorStyle={styles.songSeparator} />

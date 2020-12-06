@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, ToastAndroid, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Colors from '../../../constants/Colors';
 import Layout from '../../../constants/Layout';
 import { TracksState } from '../../../context/tracksContext';
+import showToast from '../../../utils/showToast';
 import TrackPlayerProgress from '../../TrackPlayerProgress/TrackPlayerProgress';
 import { Text } from '../../UI/Themed';
 
@@ -18,11 +19,15 @@ const PlayerCurrentSongState: React.FC<Props> = ({ currentTrack, onSeek }) => {
 			<TouchableOpacity
 				onPress={
 					currentTrack
-						? () => ToastAndroid.show(currentTrack.title!, ToastAndroid.SHORT)
+						? () =>
+								showToast({
+									message: currentTrack.name!,
+									duration: 'SHORT',
+								})
 						: undefined
 				}>
 				<Text style={styles.songTitle} numberOfLines={2}>
-					{currentTrack ? currentTrack.title : '- - -'}
+					{currentTrack ? currentTrack.name : '- - -'}
 				</Text>
 			</TouchableOpacity>
 			<TrackPlayerProgress

@@ -15,14 +15,14 @@ export default function PlayerSkipButtonSongName({ track }: Props) {
 			<TouchableOpacity
 				onPress={
 					track
-						? () => ToastAndroid.show(track.title!, ToastAndroid.SHORT)
+						? () => ToastAndroid.show(track.name!, ToastAndroid.SHORT)
 						: undefined
 				}>
 				<Text /* TODO: font */
 					numberOfLines={1}
 					ellipsizeMode="tail"
 					style={styles.text}>
-					{track ? track.title : '- - -'}
+					{track ? track.name : ' '}
 				</Text>
 			</TouchableOpacity>
 		</View>

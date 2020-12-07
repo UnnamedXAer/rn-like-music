@@ -150,15 +150,23 @@ const TracksContextProvider: React.FC = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
 	console.log(state.queueOrder);
 
-	useTrackPlayerEvents([Event.PlaybackTrackChanged], () => {
-		TrackPlayer.getCurrentTrack().then((trackId) => {
-			const track = state.queue.find((x) => x.path === trackId);
-			dispatch({
-				type: TracksActionTypes.SetCurrentTrack,
-				payload: track || null,
-			});
-		});
-	});
+	useEffect(() => {
+		if (state.currentTrack) {
+			const startSong = async (trackId: string) => {
+				try {
+					await TrackPlayer.skip(trackId);
+					await TrackPlayer.play();
+				} catch (err) {
+					showToast(
+						`Current track changed, fail to skip to it. (${state.currentTrack})`,
+						err.message,
+					);
+				}
+			};
+
+			startSong(state.currentTrack.path!);
+		}
+	}, [state.currentTrack]);
 
 	useEffect(() => {
 		dispatch({
@@ -167,11 +175,14 @@ const TracksContextProvider: React.FC = ({ children }) => {
 	}, [state.playRandomly]);
 
 	useTrackPlayerEvents([Event.PlaybackQueueEnded], async () => {
-		if (state.repeatQueue && state.queue.length > 0) {
+		if (state.repeatQueue && state.nextTrack) {
 			try {
-				console.log('queue ended, ', await TrackPlayer.getQueue());
-				// await TrackPlayer.play();
+				// @improvement - check if queue is not empty on the TrackPlayer if is set the queue from the state.
+				await TrackPlayer.skip(state.nextTrack.path!);
+				console.timeLog('start the queue after the it ended');
 			} catch (err) {
+				// @improvement clear the state queue or do @improvement from try here so we don't have to check there if the
+				//	the track queue is not empty
 				if (__DEV__) {
 					showToast('Queue ended, fail to skip to next song.', err.message);
 				}

@@ -15,7 +15,6 @@ import QueueSongMenu, {
 } from '../components/Player/QueueSongMenu/queueSongMenu';
 import assertUnreachable from '../utils/assertUnreachable';
 import { getDirInfo } from '../utils/storage/externalStorage';
-import { playTrack } from '../trackPlayer/playerUtils';
 import { RouteProp } from '@react-navigation/native';
 import showToast from '../utils/showToast';
 import { INTERNAL_ERROR_MSG } from '../constants/strings';
@@ -36,9 +35,16 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const { tracksState, dispatchTracks } = useContext(TracksContext);
 	const [longPressedSong, setLongPressedSong] = useState<Dir | null>(null);
 
+	const playTrack = async (dir: Dir) => {
+		dispatchTracks({
+			type: TracksActionTypes.SetCurrentTrack,
+			payload: dir,
+		});
+	};
+
 	const mainButtonPressHandler = async () => {
 		if (tracksState.currentTrack === null) {
-			showToast('Queue is empty.');
+			showToast("The queue is empty, let's add some songs.");
 			navigation.navigate('Directories');
 		}
 		try {
@@ -59,29 +65,21 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		try {
 			if (direction === 'next') {
 				if (tracksState.nextTrack) {
-					return await playTrack(
-						tracksState.nextTrack,
-						tracksState.currentTrack,
-						isPlaying,
-					);
+					return playTrack(tracksState.nextTrack);
 				}
-				showToast('There is no next track.');
+				showToast('There is no next song.');
 			}
 			if (tracksState.previousTrack) {
-				return await playTrack(
-					tracksState.previousTrack,
-					tracksState.currentTrack,
-					isPlaying,
-				);
+				return playTrack(tracksState.previousTrack);
 			}
-			showToast('There is no previous track.');
+			showToast('There is no previous song.');
 		} catch (err) {
 			showToast(INTERNAL_ERROR_MSG, err.message);
 		}
 	};
 
 	const queueItemPressHandler = (dir: Dir) => {
-		return playTrack(dir, tracksState.currentTrack, isPlaying);
+		return playTrack(dir);
 	};
 
 	const queueItemLongPressHandler = async (dir: Dir) => {
@@ -95,7 +93,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 		try {
 			switch (option) {
 				case 'PLAY':
-					playTrack(longPressedSong, tracksState.currentTrack, isPlaying);
+					playTrack(longPressedSong);
 					break;
 				case 'REMOVE_FROM_QUEUE':
 					try {

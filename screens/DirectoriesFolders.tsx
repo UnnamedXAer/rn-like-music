@@ -31,6 +31,7 @@ import {
 	DirectoriesActionTypes,
 	DirectoriesContext,
 } from '../context/directoriesContext';
+import { ShowToastOptions } from '../types/types';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -103,19 +104,28 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 
 	const dialogOptionHandler = async (option: DirDialogOptions) => {
 		if (longPressedDir === null) {
-			throw new Error('No dir selected by long press!');
+			setLongPressedDir(null);
+			showToast(INTERNAL_ERROR_MSG, 'No dir selected by long press!');
+			return;
 		}
 		switch (option) {
 			case 'ADD_TO_QUEUE': {
+				setLongPressedDir(null);
 				break;
 			}
-
 			case 'PLAY': {
 				try {
+					setQueueUpdateInProgress(true);
+					setLongPressedDir(null);
+
 					const songs = await getDirSongs(longPressedDir.path);
-					addTracksToQueue(songs, true);
+					addTracksToQueue(
+						songs,
+						true,
+						`Looks like there are no files to play in the "${longPressedDir.name}" folder :(.`,
+					);
 				} catch (err) {
-					console.log('err', err);
+					setQueueUpdateInProgress(true);
 					showToast({
 						message: INTERNAL_ERROR_MSG,
 						devMessage: err.message,
@@ -124,6 +134,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				break;
 			}
 			case 'SHOW_INFO': {
+				setLongPressedDir(null);
 				const info = await getDirInfo(longPressedDir.path);
 				console.log('info', info);
 				break;
@@ -131,39 +142,43 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			default:
 				assertUnreachable(option);
 		}
-		setLongPressedDir(null);
 	};
 
-	const addTracksToQueue = async (dirs: Dir[], resetQueue: boolean) => {
+	const addTracksToQueue = async (
+		dirs: Dir[],
+		resetQueue: boolean,
+		noDirsError: string | ShowToastOptions,
+	) => {
+		if (dirs.length === 0) {
+			setQueueUpdateInProgress(false);
+			showToast(noDirsError as string /* suppress ts complaining */);
+			return;
+		}
+
 		const tracks = mapDirsToTracks(dirs);
 		try {
 			if (resetQueue === true) {
 				await TrackPlayer.reset();
 			}
 			await TrackPlayer.add(tracks);
-			await TrackPlayer.play();
 			dispatchTracks({
 				type: TracksActionTypes.UpdateQueue,
 				payload: { reset: resetQueue, add: dirs },
 			});
 			navigation.navigate('Play');
 		} catch (err) {
+			setQueueUpdateInProgress(false);
 			showToast(INTERNAL_ERROR_MSG, err.message);
-			console.log('addTracksToQueue err', err);
 		}
 	};
 
-	const updateQueueHandler = async () => {
+	const updateQueueHandler = () => {
 		setQueueUpdateInProgress(true);
 		const songs = Object.values(selectedFiles);
-		if (songs.length === 0) {
-			setQueueUpdateInProgress(false);
-			return showToast(
-				'You did not choose any music to play.',
-				'"selectedFiles" is empty.',
-			);
-		}
-		await addTracksToQueue(songs, true);
+		addTracksToQueue(songs, true, {
+			message: 'You did not choose any songs to play.',
+			devMessage: '"selectedFiles" object is empty.',
+		});
 	};
 
 	const listHeaderPressHandler = (path: string) => {

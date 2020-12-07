@@ -7,7 +7,10 @@ import { ShowToastOptions } from '../types/types';
  * @param {string} message - string
  * @param {string} devMessage - string
  * @param {string} [duration = (__DEV__ ? ToastAndroid.LONG : ToastAndroid.SHORT)] - number / ignored if not Android
- * @example showToast('Already done.', 'Executed in 12ms', 'LONG');
+ * @example
+ * - showToast('Already done.');
+ * - showToast('Already done.', 'Executed in 12ms');
+ * - showToast('Already done.', 'Executed in 12ms', 'LONG');
  */
 function showToast(
 	message: string,
@@ -19,13 +22,15 @@ function showToast(
  * Show message as Toast on Android or Alert otherwise.
  *
  * @param {ShowToastOptions} messageOptions
- * @example showToast({
+ * @example
+ * showToast({
  * 	message: 'Internal error',
  * 	devMessage: error.message,
  * 	duration: "SHORT"
  * });
  */
 function showToast(messageOptions: ShowToastOptions): void;
+
 function showToast(...args: any): void {
 	const { message, devMessage, duration } = getToastArgs(...args);
 

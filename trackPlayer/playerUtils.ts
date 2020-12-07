@@ -2,6 +2,9 @@ import { ToastAndroid } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 import Dir from '../models/dir';
 
+/**
+ * @deprecated
+ */
 export const playTrack = async (
 	dir: Dir,
 	currentTrack: Dir | null = null,

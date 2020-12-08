@@ -1,5 +1,6 @@
 import RNFS from 'react-native-fs';
 import Dir from '../../models/dir';
+import showToast from '../showToast';
 import { extractPrettyPathPrefixes } from './prettyPathPrefixes';
 
 const loopThroughDirs = async (path: string) => {
@@ -44,27 +45,42 @@ const readFile = async (path: string) => {
 export const getDirSongs = async (path: string) => {
 	const songs: Dir[] = [];
 	const paths: string[] = [path];
+	const errors: { [path: string]: string } = {};
+
 	do {
 		const currentPath = paths.shift()!;
-		const dirs = await RNFS.readDir(currentPath);
+		let dirs: RNFS.ReadDirItem[] | null = null;
+		try {
+			dirs = await RNFS.readDir(currentPath);
+		} catch (err) {
+			errors[currentPath] = err.message;
+		}
 
-		for (let i = dirs.length - 1; i >= 0; i--) {
-			const dir = dirs[i];
-			if (dir.isDirectory()) {
-				paths.push(dir.path);
-				continue;
-			}
-			if (dir.isFile()) {
-				if (dir.name.endsWith('.mp3')) {
-					songs.push(
-						new Dir(dir.path, dir.path, dir.name, +dir.size, false, true),
-					);
+		if (dirs !== null) {
+			for (let i = dirs.length - 1; i >= 0; i--) {
+				const dir = dirs[i];
+				if (dir.isDirectory()) {
+					paths.push(dir.path);
+					continue;
 				}
-				continue;
+				if (dir.isFile()) {
+					if (dir.name.endsWith('.mp3')) {
+						songs.push(
+							new Dir(dir.path, dir.path, dir.name, +dir.size, false, true),
+						);
+					}
+					continue;
+				}
+				console.log('NOT a direction and NOT a file!!!', dir);
 			}
-			console.log('NOT a direction and NOT a file!!!', dir);
 		}
 	} while (paths.length > 0);
+
+	if (__DEV__) {
+		console.log('[getDirSongs] ', errors);
+		showToast('There were problems with some paths. Checkout the console logs.');
+	}
+
 	return songs;
 };
 

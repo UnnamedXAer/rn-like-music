@@ -2,7 +2,7 @@
 
 #### Mobile music player.
 
-	...
+    ...
 
 ### :pencil: Implementation list
 
@@ -20,8 +20,8 @@
 -   [ ] Add functionality to
     -   [x] Play / pause songs
     -   [x] Skip songs
-    -   [ ] Play in loop
-    -   [ ] Play randomly
+    -   [x] Play in loop
+    -   [x] Play randomly
 -   [ ] Add player notifications actions
 -   [ ] Add Playlists UI
 -   [ ] Allow creating playlists
@@ -33,3 +33,8 @@
     -   [x] Additional Light
     -   [x] Additional Dark
 -   [ ] Show album / song avatar
+-   [ ] Clear code.
+-   [ ] Create the app icon
+-   [ ] Configure the release related settings like icons etc.
+-	[ ] Add alert about the sound level, "Sound level is 0"
+-	[ ] Show some information about sound output. 

@@ -45,7 +45,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	const mainButtonPressHandler = async () => {
 		if (tracksState.currentTrack === null) {
 			showToast("The queue is empty, let's add some songs.");
-			navigation.navigate('Directories');
+			return navigation.navigate('Directories');
 		}
 		try {
 			if (!isPlaying) {

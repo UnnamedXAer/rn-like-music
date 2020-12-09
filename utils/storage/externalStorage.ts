@@ -76,7 +76,7 @@ export const getDirSongs = async (path: string) => {
 		}
 	} while (paths.length > 0);
 
-	if (__DEV__) {
+	if (__DEV__ && Object.keys(errors).length > 0) {
 		console.log('[getDirSongs] ', errors);
 		showToast('There were problems with some paths. Checkout the console logs.');
 	}

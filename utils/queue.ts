@@ -46,7 +46,12 @@ export function getCurrentTracks(
 	let _currentTrack =
 		currentTrack === null ? queue[queueOrder[0]] : { ...currentTrack };
 
-	const currTrackIdx = queue.findIndex((x) => x.path === _currentTrack.path);
+	let currTrackIdx = queue.findIndex((x) => x.path === _currentTrack.path);
+
+	if (currTrackIdx === -1) {
+		currTrackIdx = 0;
+		_currentTrack = queue[queueOrder[0]];
+	}
 
 	const currentTrackIdxInOrder = queueOrder.indexOf(currTrackIdx);
 

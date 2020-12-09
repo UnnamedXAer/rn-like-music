@@ -1,5 +1,9 @@
 import React, { useEffect, useReducer } from 'react';
-import TrackPlayer, { Event, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, {
+	Event,
+	Track,
+	useTrackPlayerEvents,
+} from 'react-native-track-player';
 import Dir from '../models/dir';
 import { ContextActionMap } from '../types/reactTypes';
 import { getCurrentTracks, getQueueOrder } from '../utils/queue';
@@ -56,6 +60,7 @@ const reducer = (state: TracksState, action: TracksActions): TracksState => {
 			if (action.payload.add) {
 				updatedQueue = updatedQueue.concat(action.payload.add);
 			}
+
 			if (action.payload.remove) {
 				action.payload.remove.forEach((songPath) => {
 					const idx = updatedQueue!.findIndex((x) => x.path === songPath);
@@ -154,9 +159,32 @@ const TracksContextProvider: React.FC = ({ children }) => {
 		if (state.currentTrack) {
 			const startSong = async (trackId: string) => {
 				try {
-					await TrackPlayer.skip(trackId);
+					const actuallyPlayingTrackId = await TrackPlayer.getCurrentTrack();
+					const newTrack = await TrackPlayer.getTrack(trackId);
+					if (!newTrack) {
+						throw new Error(`Unable to play the song "${trackId}"`);
+					}
+					if (actuallyPlayingTrackId !== trackId) {
+						await TrackPlayer.skip(trackId);
+					}
 					await TrackPlayer.play();
 				} catch (err) {
+					dispatch({
+						type: TracksActionTypes.UpdateQueue,
+						payload: { remove: [trackId] },
+					});
+					TrackPlayer.remove(([trackId] as unknown) as Track).catch(
+						(removeErr) => {
+							/* nothing more can be done except we could reset queue */
+							console.log(
+								'[CurrentTrackChanged] - error - [TrackPlayer.remove] - error:\n ',
+								trackId,
+								'\n',
+								removeErr,
+							);
+						},
+					);
+					console.log('[CurrentTrackChanged] error: ', err);
 					showToast(
 						`Current track changed, fail to skip to it. (${state.currentTrack})`,
 						err.message,

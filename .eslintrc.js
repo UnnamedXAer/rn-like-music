@@ -6,5 +6,11 @@ module.exports = {
 	rules: {
 		'react-native/no-inline-styles': 0,
 		'no-mixed-spaces-and-tabs': 0,
+		'prettier/prettier': [
+			'error',
+			{
+				endOfLine: 'auto',
+			},
+		],
 	},
 };

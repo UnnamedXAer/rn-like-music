@@ -1,6 +1,6 @@
 export type StateError = string | null;
 
-export type ContextActionMap<M extends { [key: string]: any }> = {
+export type StoreActionMap<M extends { [key: string]: any }> = {
 	[Key in keyof M]: M[Key] extends undefined
 		? {
 				type: Key;

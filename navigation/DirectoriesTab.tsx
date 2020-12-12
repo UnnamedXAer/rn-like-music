@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
 	createMaterialTopTabNavigator,
 	MaterialTopTabBarOptions,
@@ -8,6 +8,16 @@ import { DirectoriesTabParamList } from './types/DirectoriesTabNavigatorTypes';
 import DirectoriesFolders from '../screens/DirectoriesFolders';
 import useColorScheme from '../hooks/useColorScheme';
 import Colors from '../constants/Colors';
+import { DirectoriesActionTypes } from '../store/directories/types';
+import { BASE_PATH } from '../constants/strings';
+import {
+	getMainDirsAndPrettyPrefixes,
+	readStorage,
+} from '../utils/storage/externalStorage';
+import { getPathByPrettyPath } from '../utils/storage/prettyPathPrefixes';
+import showToast from '../utils/showToast';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/types';
 
 const DirectoriesTab = createMaterialTopTabNavigator<DirectoriesTabParamList>();
 
@@ -32,6 +42,56 @@ const DirectoriesTabNavigator = () => {
 		tabBarOptions.activeTintColor = Colors.dark.text;
 	}
 
+	const dispatch = useDispatch();
+	const state = useSelector((storeState: RootState) => storeState.directories);
+
+	useEffect(() => {
+		if (state.mainDirectoriesRead === false) {
+			dispatch({
+				type: DirectoriesActionTypes.SetLoading,
+				payload: true,
+			});
+
+			getMainDirsAndPrettyPrefixes()
+				.then((mainDirsAndPrefixes) => {
+					const { mainDirs, prettyPathPrefixes } = mainDirsAndPrefixes;
+					dispatch({
+						type: DirectoriesActionTypes.SetPrettyPathPrefixes,
+						payload: prettyPathPrefixes,
+					});
+					dispatch({
+						type: DirectoriesActionTypes.SetDirectories,
+						payload: { dirs: mainDirs, path: BASE_PATH },
+					});
+				})
+				.catch((err) => {
+					showToast('Fail to read device files storage.', err.message);
+				});
+		}
+	}, [dispatch, state.mainDirectoriesRead]);
+
+	useEffect(() => {
+		const prettyPath = state.currentPath;
+		if (prettyPath !== BASE_PATH && !state.subDirectories[prettyPath]) {
+			const path = getPathByPrettyPath(prettyPath, state.prettyPathPrefixes);
+			readStorage(path)
+				.then((dirs) => {
+					dirs.forEach((dir) => (dir.prettyPath = prettyPath + '/' + dir.name));
+
+					dispatch({
+						type: DirectoriesActionTypes.SetDirectories,
+						payload: {
+							path: prettyPath,
+							dirs,
+						},
+					});
+				})
+				.catch((err) => {
+					showToast('Fail to read device files storage.', err.message);
+				});
+		}
+	}, [dispatch, state.currentPath, state.prettyPathPrefixes, state.subDirectories]);
+
 	return (
 		<DirectoriesTab.Navigator
 			tabBarOptions={tabBarOptions}
@@ -51,8 +111,6 @@ const DirectoriesTabNavigator = () => {
 				}}
 				component={DirectoriesFolders}
 			/>
-			{/* <DirectoriesTab.Screen name="All" component={DirectoriesAllMusicFiles} />
-			<DirectoriesTab.Screen name="Playlists" component={DirectoriesPlaylists} /> */}
 		</DirectoriesTab.Navigator>
 	);
 };

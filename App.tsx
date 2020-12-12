@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import DirectoriesContextProvider from './context/directoriesContext';
-import PlayerContextProvider from './context/playerContext';
-import TracksContextProvider from './context/tracksContext';
-
+import { Provider } from 'react-redux';
 import useStoragePermission from './hooks/useStoragePermission';
 import Navigator from './navigation';
 import NoPermissionsScreen from './screens/NoPermissionsScreen';
-import { trackPlayerInit } from './trackPlayer/playerInit';
+import store from './store/store';
+import { trackPlayerInit } from './utils/trackPlayer/playerInit';
 
 // declare const global: { HermesInternal: null | {} };
 
@@ -31,13 +29,9 @@ const App = () => {
 	}
 
 	return (
-		<DirectoriesContextProvider>
-			<PlayerContextProvider>
-				<TracksContextProvider>
-					<Navigator />
-				</TracksContextProvider>
-			</PlayerContextProvider>
-		</DirectoriesContextProvider>
+		<Provider store={store}>
+			<Navigator />
+		</Provider>
 	);
 };
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	View,
 	Text,
@@ -7,7 +7,6 @@ import {
 	ActivityIndicator,
 	BackHandler,
 } from 'react-native';
-import TrackPlayer from 'react-native-track-player';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
@@ -15,7 +14,6 @@ import { getDirInfo, getDirSongs } from '../utils/storage/externalStorage';
 import Button from '../components/UI/Button';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
-import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 import useColorScheme from '../hooks/useColorScheme';
 import DirItemSeparator from '../components/DirTree/dirItemSeparator';
 import Colors from '../constants/Colors';
@@ -26,12 +24,12 @@ import DirItemDialog, {
 import assertUnreachable from '../utils/assertUnreachable';
 import showToast from '../utils/showToast';
 import { BASE_PATH, INTERNAL_ERROR_MSG } from '../constants/strings';
-import { mapDirsToTracks } from '../utils/mapData';
-import {
-	DirectoriesActionTypes,
-	DirectoriesContext,
-} from '../context/directoriesContext';
 import { ShowToastOptions } from '../types/types';
+import Playable from '../models/playable';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/types';
+import { DirectoriesActionTypes } from '../store/directories/types';
+import { setQueueTracks } from '../store/queue/actions';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -46,15 +44,15 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	}>({});
 	const [queueUpdateInProgress, setQueueUpdateInProgress] = useState(false);
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
-	const { dispatchTracks } = useContext(TracksContext);
-	const { directoriesState, dispatchDirectories } = useContext(DirectoriesContext);
+	const directoriesState = useSelector((rootState: RootState) => rootState.directories);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const backAction = () => {
 			if (directoriesState.currentPath === BASE_PATH) {
 				return false;
 			}
-			dispatchDirectories({
+			dispatch({
 				type: DirectoriesActionTypes.GoBack,
 			});
 			return true;
@@ -65,40 +63,36 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		return () => {
 			handler.remove();
 		};
-	}, [directoriesState.currentPath, dispatchDirectories]);
+	}, [directoriesState.currentPath, dispatch]);
 
-	const toggleSelectSong = async (dir: Dir) => {
-		if (dir.path.endsWith('.mp3') || dir.path.endsWith('.flac')) {
-			setSelectedFiles((prevState) => {
-				if (prevState[dir.path]) {
-					const updatedState = { ...prevState };
-					delete updatedState[dir.path];
-					return updatedState;
-				}
-				return { ...prevState, [dir.path]: dir };
-			});
-		} else {
-			showToast(dir.name + ' is not a mp3 file.');
-		}
+	const toggleSelectSong = async (song: Playable) => {
+		setSelectedFiles((prevState) => {
+			if (prevState[song.path]) {
+				const updatedState = { ...prevState };
+				delete updatedState[song.path];
+				return updatedState;
+			}
+			return { ...prevState, [song.path]: song };
+		});
 	};
 
-	const directoryItemPressHandler = (dir: Dir) => {
-		if (dir.isFile) {
+	const directoryItemPressHandler = (dir: Dir | Playable) => {
+		if (dir instanceof Playable) {
 			toggleSelectSong(dir);
+			return;
 		}
-		if (dir.isDirectory) {
-			dispatchDirectories({
-				type: DirectoriesActionTypes.SetCurrentDir,
-				payload: dir.prettyPath,
-			});
-		}
+
+		dispatch({
+			type: DirectoriesActionTypes.SetCurrentDir,
+			payload: dir.prettyPath,
+		});
 	};
 
-	const directoryItemLongPressHandler = (dir: Dir) => {
+	const directoryItemLongPressHandler = (dir: Dir | Playable) => {
 		openDirectoryMenu(dir);
 	};
 
-	const openDirectoryMenu = (dir: Dir) => {
+	const openDirectoryMenu = (dir: Dir | Playable) => {
 		setLongPressedDir(dir);
 	};
 
@@ -109,7 +103,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			return;
 		}
 		switch (option) {
-			case 'ADD_TO_QUEUE':
+			case 'ADD_TO_QUEUE': // @todo: append to queue
 			case 'PLAY': {
 				try {
 					setQueueUpdateInProgress(true);
@@ -142,26 +136,17 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 	};
 
 	const addTracksToQueue = async (
-		dirs: Dir[],
+		songs: Playable[],
 		resetQueue: boolean,
 		noDirsError: string | ShowToastOptions,
 	) => {
-		if (dirs.length === 0) {
+		if (songs.length === 0) {
 			setQueueUpdateInProgress(false);
-			showToast(noDirsError as string /* suppress ts complaining */);
+			showToast(noDirsError as string); // @i: suppress ts complaining
 			return;
 		}
-
-		const tracks = mapDirsToTracks(dirs);
 		try {
-			if (resetQueue === true) {
-				await TrackPlayer.reset();
-			}
-			await TrackPlayer.add(tracks);
-			dispatchTracks({
-				type: TracksActionTypes.UpdateQueue,
-				payload: { reset: resetQueue, add: dirs },
-			});
+			await dispatch(setQueueTracks(songs, resetQueue));
 			navigation.navigate('Play');
 		} catch (err) {
 			setQueueUpdateInProgress(false);
@@ -182,7 +167,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		if (path === '') {
 			return;
 		}
-		dispatchDirectories({
+		dispatch({
 			type: DirectoriesActionTypes.SetCurrentDir,
 			payload: path,
 		});
@@ -192,7 +177,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		<ThemedView style={styles.container}>
 			<Button
 				onPress={() => {
-					dispatchDirectories({
+					dispatch({
 						type: DirectoriesActionTypes.ResetState,
 					});
 				}}

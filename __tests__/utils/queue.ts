@@ -1,4 +1,4 @@
-import { getQueueOrder, shuffleQueue } from '../../utils/queue';
+import { getQueueOrder, shuffleQueue } from '../../utils/trackPlayer/playerQueue';
 
 const indexes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 test('should return shuffled array of indexes', () => {

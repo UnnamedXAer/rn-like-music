@@ -1,14 +1,11 @@
-import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Alert } from 'react-native';
-import TrackPlayer, { Track } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { View as ThemedView } from '../components/UI/Themed';
-import { TracksActionTypes, TracksContext } from '../context/tracksContext';
 import PlayerQueue from '../components/Player/PlayerQueue/playerQueue';
-import { PlayerContext } from '../context/playerContext';
 import PlayerCurrentSongState from '../components/Player/PlayerCurrentSongState/playerCurrentSongState';
-import PlayerActions from '../components/PlayerActions/playerActions';
+import PlayerActionsSection from '../components/PlayerActions/playerActions';
 import { SkipSong } from '../components/Player/PlayerMainSkipButton/playerMainSkipButton';
 import QueueSongMenu, {
 	QueueSongOptionsOption,
@@ -21,38 +18,40 @@ import { INTERNAL_ERROR_MSG } from '../constants/strings';
 import Layout from '../constants/Layout';
 import { PlayerAdditionalPropAction } from '../components/Player/PlayerAdditionalActionButton/PlayerAdditionalActionButton';
 import Dir from '../models/dir';
-
-type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Play'>;
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store/types';
+import Playable from '../models/playable';
+import * as PlayerActions from '../store/player/actions';
+import { PlayNavigationProp } from '../navigation/types/PlayerScreenNavigatorTypes';
 
 type PlayScreenRouteProp = RouteProp<RootStackParamList, 'Play'>;
 interface Props {
-	navigation: ScreenNavigationProp;
+	navigation: PlayNavigationProp;
 	route: PlayScreenRouteProp;
 }
 
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
-	const { isPlaying } = useContext(PlayerContext);
-	const { tracksState, dispatchTracks } = useContext(TracksContext);
+	const {
+		isPlaying,
+		currentTrack,
+		random: playRandomly,
+		repeat: repeatQueue,
+	} = useSelector((rootState: RootState) => rootState.player);
+	const queue = useSelector((rootState: RootState) => rootState.queue);
 	const [longPressedSong, setLongPressedSong] = useState<Dir | null>(null);
+	const dispatch = useDispatch();
 
-	const playTrack = async (dir: Dir) => {
-		dispatchTracks({
-			type: TracksActionTypes.SetCurrentTrack,
-			payload: dir,
-		});
+	const playTrack = async (song: Playable) => {
+		dispatch(PlayerActions.playTrack(song));
 	};
 
 	const mainButtonPressHandler = async () => {
-		if (tracksState.currentTrack === null) {
+		if (currentTrack === null) {
 			showToast("The queue is empty, let's add some songs.");
-			return navigation.navigate('Directories');
+			return navigation.navigate('Directories', { screen: 'Folders' });
 		}
 		try {
-			if (!isPlaying) {
-				await TrackPlayer.play();
-			} else {
-				await TrackPlayer.pause();
-			}
+			await dispatch(PlayerActions.togglePlay());
 		} catch (err) {
 			showToast(
 				INTERNAL_ERROR_MSG,
@@ -63,16 +62,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 
 	const skipSongHandler: SkipSong = async (direction) => {
 		try {
-			if (direction === 'next') {
-				if (tracksState.nextTrack) {
-					return playTrack(tracksState.nextTrack);
-				}
-				showToast('There is no next song.');
-			}
-			if (tracksState.previousTrack) {
-				return playTrack(tracksState.previousTrack);
-			}
-			showToast('There is no previous song.');
+			await dispatch(PlayerActions.skipTrack(direction));
 		} catch (err) {
 			showToast(INTERNAL_ERROR_MSG, err.message);
 		}
@@ -97,22 +87,22 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					break;
 				case 'REMOVE_FROM_QUEUE':
 					try {
-						const tract = await TrackPlayer.getTrack(longPressedSong.path);
-						if (tract.id === tracksState.currentTrack?.path) {
-							await TrackPlayer.stop();
-							if (tracksState.nextTrack) {
-								await TrackPlayer.skip(tracksState.nextTrack?.path);
-							}
-						}
-						console.log('about to remove track: ', tract);
-						await TrackPlayer.remove([(tract.id as unknown) as Track]);
-						dispatchTracks({
-							type: TracksActionTypes.UpdateQueue,
-							payload: {
-								remove: [longPressedSong.path],
-							},
-						});
-						showToast('track removed', tract.title);
+						// 	const tract = await TrackPlayer.getTrack(longPressedSong.path);
+						// 	if (tract.id === tracksState.currentTrack?.path) {
+						// 		await TrackPlayer.stop();
+						// 		if (tracksState.nextTrack) {
+						// 			await TrackPlayer.skip(tracksState.nextTrack?.path);
+						// 		}
+						// 	}
+						// 	console.log('about to remove track: ', tract);
+						// 	await TrackPlayer.remove([(tract.id as unknown) as Track]);
+						// 	dispatchTracks({
+						// 		type: TracksActionTypes.UpdateQueue,
+						// 		payload: {
+						// 			remove: [longPressedSong.path],
+						// 		},
+						// 	});
+						showToast('track removed', longPressedSong.name);
 					} catch (err) {
 						showToast(
 							'Fail to remove track: ' + longPressedSong.name,
@@ -145,38 +135,37 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 	};
 
 	const additionalPlayerPropActionHandler: PlayerAdditionalPropAction = (action) => {
-		let dispatchActionType = TracksActionTypes.TogglePlayRandomly;
 		if (action === 'repeat-queue') {
-			dispatchActionType = TracksActionTypes.ToggleRepeatQueue;
+			return dispatch(PlayerActions.togglePlayerParameter('repeat'));
 		}
-		dispatchTracks({ type: dispatchActionType });
+		dispatch(PlayerActions.togglePlayerParameter('random'));
 	};
 
 	return (
 		<>
 			<ThemedView style={styles.container}>
 				<PlayerQueue
-					queue={tracksState.queue}
-					currentTrackId={tracksState.currentTrack?.path}
+					queue={queue.tracks}
+					currentTrackId={currentTrack?.path}
 					loading={false}
 					onSongPress={queueItemPressHandler}
 					onSongLongPress={queueItemLongPressHandler}
 					onNoSongPress={() => {
-						navigation.navigate('Directories');
+						navigation.navigate('Directories', { screen: 'Folders' });
 					}}
 				/>
 				<PlayerCurrentSongState
-					currentTrack={tracksState.currentTrack}
+					currentTrack={currentTrack}
 					onSeek={songSeekHandler}
 				/>
-				<PlayerActions
+				<PlayerActionsSection
 					mainButtonAction={isPlaying ? 'pause' : 'play'}
 					mainButtonPressHandler={mainButtonPressHandler}
-					nextTrack={tracksState.nextTrack}
-					previousTrack={tracksState.previousTrack}
+					nextTrack={null}
+					previousTrack={null}
 					skipSong={skipSongHandler}
-					playRandomly={tracksState.playRandomly}
-					repeatQueue={tracksState.repeatQueue}
+					playRandomly={playRandomly}
+					repeatQueue={repeatQueue}
 					additionalPlayerPropAction={additionalPlayerPropActionHandler}
 				/>
 			</ThemedView>

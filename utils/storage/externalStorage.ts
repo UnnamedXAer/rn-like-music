@@ -1,6 +1,8 @@
 import RNFS from 'react-native-fs';
 import Dir from '../../models/dir';
+import Playable from '../../models/playable';
 import showToast from '../showToast';
+import { isFilePlayable } from './isFilePlayable';
 import { extractPrettyPathPrefixes } from './prettyPathPrefixes';
 
 const loopThroughDirs = async (path: string) => {
@@ -14,16 +16,14 @@ const loopThroughDirs = async (path: string) => {
 				continue;
 			}
 
-			elements.push(
-				new Dir(
-					dir.path,
-					'',
-					dir.name,
-					+dir.size,
-					dir.isDirectory(),
-					dir.isFile(),
-				),
-			);
+			if (dir.isDirectory()) {
+				elements.push(new Dir(dir.path, '', dir.name));
+				continue;
+			}
+			if (isFilePlayable(dir.name)) {
+				elements.push(new Playable(dir.path, '', dir.name));
+				continue;
+			}
 		}
 		return elements;
 	} else {
@@ -43,7 +43,7 @@ const readFile = async (path: string) => {
 };
 
 export const getDirSongs = async (path: string) => {
-	const songs: Dir[] = [];
+	const songs: Playable[] = [];
 	const paths: string[] = [path];
 	const errors: { [path: string]: string } = {};
 
@@ -63,15 +63,10 @@ export const getDirSongs = async (path: string) => {
 					paths.push(dir.path);
 					continue;
 				}
-				if (dir.isFile()) {
-					if (dir.name.endsWith('.mp3')) {
-						songs.push(
-							new Dir(dir.path, dir.path, dir.name, +dir.size, false, true),
-						);
-					}
+				if (isFilePlayable(dir.name)) {
+					songs.push(new Playable(dir.path, dir.path, dir.name));
 					continue;
 				}
-				console.log('NOT a direction and NOT a file!!!', dir);
 			}
 		}
 	} while (paths.length > 0);
@@ -100,13 +95,13 @@ export const getMainDirsAndPrettyPrefixes = async () => {
 			const dirName = 'Internal Storage';
 			const prettyDir = `/Device/${dirName}`;
 
-			mainDirs.push(new Dir(dir, prettyDir, dirName, 0, true, false));
+			mainDirs.push(new Dir(dir, prettyDir, dirName));
 			continue;
 		}
 		const dirName = 'SD Card' + (sdCardCnt === 0 ? '' : ' ' + sdCardCnt);
 		const prettyDir = `/Device/${dirName}`;
 
-		mainDirs.push(new Dir(dir, prettyDir, dirName, 0, true, false));
+		mainDirs.push(new Dir(dir, prettyDir, dirName));
 		sdCardCnt++;
 	}
 	return { mainDirs, prettyPathPrefixes };

@@ -10,6 +10,6 @@ if (__DEV__) {
 }
 const store = createStore(reducer, compose(applyMiddleware(...middlewares)));
 
-console.log('typeof(HermesInternal)', typeof HermesInternal);
+// console.log('typeof(HermesInternal)', typeof HermesInternal);
 
 export default store;

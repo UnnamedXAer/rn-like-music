@@ -26,7 +26,6 @@ const DirectoriesListHeader: React.FC<Props> = ({ onPress, currentPath }) => {
 							for (let i = 0; i <= idx; i++) {
 								relativePath.push(pathParts[i]);
 							}
-							console.log('relativePath:', relativePath.join('/'));
 							onPress(relativePath.join('/'));
 						}}>
 						<ThemedText style={styles.text}>

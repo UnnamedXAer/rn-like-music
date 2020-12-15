@@ -7,7 +7,7 @@ export default function NoPermissionsScreen() {
 		<>
 			<StatusBar />
 			<SafeAreaView>
-				<View>
+				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 					<Text>
 						Storage permission is required for app to be able to play your
 						music.

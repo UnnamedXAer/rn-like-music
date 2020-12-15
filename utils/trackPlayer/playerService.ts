@@ -1,14 +1,35 @@
 import TrackPlayer, { Event } from 'react-native-track-player';
+import * as PlayerActions from '../../store/player/actions';
+import store from '../../store/store';
 
-export default async function () {
-	// This service needs to be registered for the module to work
-	// but it will be used later in the "Receiving Events" section
+const { dispatch } = store;
 
-	TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
+export default async function playerServiceHandler() {
+	TrackPlayer.addEventListener(Event.RemotePlay, () => {
+		dispatch<any>(PlayerActions.togglePlay());
+	});
 
-	TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
+	TrackPlayer.addEventListener(Event.RemotePause, () => {
+		dispatch(PlayerActions.togglePlay() as any);
+	});
 
-	TrackPlayer.addEventListener(Event.RemoteStop, () => TrackPlayer.destroy());
+	TrackPlayer.addEventListener(Event.RemoteStop, () => {
+		// @todo: reset state
+		TrackPlayer.destroy();
+	});
 
-	console.log('player-service registered.');
+	TrackPlayer.addEventListener(Event.RemoteNext, () => {
+		dispatch(PlayerActions.skipTrack('next') as any);
+	});
+
+	TrackPlayer.addEventListener(Event.RemotePrevious, () => {
+		dispatch(PlayerActions.skipTrack('previous') as any);
+	});
+
+	TrackPlayer.addEventListener(Event.PlaybackError, (ev) => {
+		console.log('--------------------PLAYBACK ERROR----------------------------');
+		console.error(ev);
+	});
+
+	await dispatch<any>(PlayerActions.setPlayerInitialized(true));
 }

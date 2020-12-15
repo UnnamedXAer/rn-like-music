@@ -1,6 +1,7 @@
 import Dir from '../../models/dir';
 
 export enum PlayerActionTypes {
+	SetPlayerInitialized = 'PLAYER_SET_INITIALIZED',
 	SetCurrentTrack = 'PLAYER_SET_CURRENT_TRACK',
 	ToggleFlag = 'PLAYER_TOGGLE_FLAG',
 	SetIsPlaying = 'PLAYER_SET_IS_PLAYING',
@@ -9,6 +10,7 @@ export enum PlayerActionTypes {
 export type PlayerFlag = 'repeat' | 'random';
 
 export type PlayerStoreState = {
+	readonly initialized: boolean;
 	readonly currentTrack: Dir | null;
 	readonly isPlaying: boolean;
 } & {
@@ -16,6 +18,7 @@ export type PlayerStoreState = {
 };
 
 export type PlayerActionPayload = {
+	[PlayerActionTypes.SetPlayerInitialized]: PlayerStoreState['initialized'];
 	[PlayerActionTypes.SetCurrentTrack]: PlayerStoreState['currentTrack'] | null;
 	[PlayerActionTypes.ToggleFlag]: PlayerFlag;
 	[PlayerActionTypes.SetIsPlaying]: PlayerStoreState['isPlaying'];
@@ -34,8 +37,13 @@ export interface SetCurrentTrackAction {
 	type: PlayerActionTypes.SetCurrentTrack;
 	payload: PlayerActionPayload[PlayerActionTypes.SetCurrentTrack];
 }
+export interface SetPlayerInitializedAction {
+	type: PlayerActionTypes.SetPlayerInitialized;
+	payload: PlayerActionPayload[PlayerActionTypes.SetPlayerInitialized];
+}
 
 export type PlayerActions =
+	| SetPlayerInitializedAction
 	| SetIsPlayingAction
 	| SetCurrentTrackAction
 	| TogglePlayerParameter;

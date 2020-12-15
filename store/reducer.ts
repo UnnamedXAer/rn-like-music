@@ -5,6 +5,6 @@ import QueueReducer from './queue/reducer';
 
 export default combineReducers({
 	directories: DirectoriesReducer,
-	player: PlayerReducer,
 	queue: QueueReducer,
+	player: PlayerReducer,
 });

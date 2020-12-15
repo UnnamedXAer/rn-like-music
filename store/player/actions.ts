@@ -3,22 +3,27 @@ import {
 	PlayerActionTypes,
 	SetCurrentTrackAction,
 	SetIsPlayingAction,
+	SetPlayerInitializedAction,
 	TogglePlayerParameter,
 } from './types';
 import TrackPlayer from 'react-native-track-player';
-import { ThunkAction } from 'redux-thunk';
-import { RootState } from '../types';
 import Playable from '../../models/playable';
 import { getNextTrackInDirection } from '../../utils/trackPlayer/playerQueue';
+import { ThunkResult } from '../types';
+
+export const setPlayerInitialized = (
+	initialized: boolean,
+): SetPlayerInitializedAction => {
+	console.log('[setPlayerInitialized]', initialized);
+	return {
+		type: PlayerActionTypes.SetPlayerInitialized,
+		payload: initialized,
+	};
+};
 
 export const playTrack = (
 	track: Playable | null,
-): ThunkAction<
-	Promise<void>,
-	RootState,
-	any,
-	SetCurrentTrackAction | SetIsPlayingAction
-> => {
+): ThunkResult<SetCurrentTrackAction | SetIsPlayingAction> => {
 	return async (dispatch, getState) => {
 		try {
 			if (track !== null) {
@@ -40,12 +45,7 @@ export const playTrack = (
 	};
 };
 
-export const togglePlay = (): ThunkAction<
-	Promise<void>,
-	RootState,
-	any,
-	SetIsPlayingAction
-> => {
+export const togglePlay = (): ThunkResult<SetIsPlayingAction> => {
 	return async (dispatch, getState) => {
 		try {
 			const isPlaying = getState().player.isPlaying;
@@ -64,7 +64,7 @@ export const togglePlay = (): ThunkAction<
 
 export const skipTrack = (
 	direction: 'next' | 'previous',
-): ThunkAction<Promise<void>, RootState, any, SetCurrentTrackAction> => {
+): ThunkResult<SetCurrentTrackAction> => {
 	return async (dispatch, getState) => {
 		const {
 			queue: { tracks },

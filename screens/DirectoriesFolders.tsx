@@ -103,16 +103,17 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			return;
 		}
 		switch (option) {
-			case 'ADD_TO_QUEUE': // @todo: append to queue
+			case 'ADD_TO_QUEUE':
 			case 'PLAY': {
 				try {
 					setQueueUpdateInProgress(true);
 					setLongPressedDir(null);
 
 					const songs = await getDirSongs(longPressedDir.path);
+					const resetQueue = option === 'PLAY';
 					addTracksToQueue(
 						songs,
-						option === 'PLAY',
+						resetQueue,
 						`Looks like there are no files to play in the "${longPressedDir.name}" folder :(.`,
 					);
 				} catch (err) {

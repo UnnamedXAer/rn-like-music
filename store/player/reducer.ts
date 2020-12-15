@@ -31,6 +31,11 @@ const reducer = (state = initialState, action: PlayerActions): PlayerStoreState 
 				...state,
 				[action.payload]: !state[action.payload],
 			};
+		case PlayerActionTypes.SetPlayerInitialized:
+			return {
+				...state,
+				initialized: action.payload,
+			};
 		default:
 			return state;
 	}

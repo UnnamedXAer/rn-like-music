@@ -3,9 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Layout from '../../constants/Layout';
 import Dir from '../../models/dir';
+import Playable from '../../models/playable';
 
 interface Props {
-	dir: Dir;
+	dir: Dir | Playable;
 	// loading: boolean | undefined;
 	color: string;
 	isSelected: boolean;
@@ -15,12 +16,10 @@ const DirIcon: React.FC<Props> = ({ dir, /*loading,*/ color, isSelected }) => {
 	let iconName = 'file';
 	if (isSelected) {
 		iconName = 'check';
-	} else if (dir.isDirectory) {
+	} else if (dir instanceof Playable) {
+		iconName = 'music';
+	} else if (dir instanceof Dir) {
 		iconName = 'folder-open';
-	} else if (dir.isFile) {
-		if (/\.mp3/.test(dir.name)) {
-			iconName = 'music';
-		}
 	}
 
 	return (

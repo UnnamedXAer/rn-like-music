@@ -13,9 +13,8 @@ export default async function playerServiceHandler() {
 		dispatch(PlayerActions.togglePlay() as any);
 	});
 
-	TrackPlayer.addEventListener(Event.RemoteStop, () => {
-		// @todo: reset state
-		TrackPlayer.destroy();
+	TrackPlayer.addEventListener(Event.RemoteStop, async () => {
+		dispatch<any>(PlayerActions.stopPlayer());
 	});
 
 	TrackPlayer.addEventListener(Event.RemoteNext, () => {
@@ -30,6 +29,5 @@ export default async function playerServiceHandler() {
 		console.log('--------------------PLAYBACK ERROR----------------------------');
 		console.error(ev);
 	});
-
-	await dispatch<any>(PlayerActions.setPlayerInitialized(true));
+	console.log('Player Service Handler - Done!');
 }

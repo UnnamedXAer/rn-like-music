@@ -12,9 +12,9 @@ export type QueueActionPayload = {
 	[QueueActionTypes.SetTracks]: QueueStoreState['tracks'];
 };
 
-export interface SetTracks {
+export interface QueueSetTracks {
 	type: QueueActionTypes.SetTracks;
 	payload: QueueActionPayload[typeof QueueActionTypes.SetTracks];
 }
 
-export type QueueActions = SetTracks;
+export type QueueActions = QueueSetTracks;

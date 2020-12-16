@@ -1,31 +1,47 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator, AppState, View } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useEffect } from 'react';
+import { ActivityIndicator, AppState, AppStateStatus, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import Colors from '../constants/Colors';
 import useStoragePermission from '../hooks/useStoragePermission';
 import Navigator from '../navigation';
 import NoPermissionsScreen from '../screens/NoPermissionsScreen';
+import { addStateQueueToPlayer } from '../store/queue/actions';
 import { RootState } from '../store/types';
 import { trackPlayerInit } from '../utils/trackPlayer/playerInit';
 
 const Layout: React.FC = () => {
 	// @improvement: move to store
 	const isStoragePermissionGranted = useStoragePermission();
-	const playerInitialized = useSelector(
-		(rootState: RootState) => rootState.player.initialized,
+	const { initialized: playerInitialized, destroyed: playerDestroyed } = useSelector(
+		(rootState: RootState) => rootState.player,
+	);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		if (playerInitialized === false) {
+			trackPlayerInit();
+		}
+	}, [playerInitialized]);
+
+	const appStateChangeHandler = useCallback(
+		(nextAppState: AppStateStatus) => {
+			if (nextAppState === 'active') {
+				if (playerDestroyed === true) {
+					trackPlayerInit().then(() => {
+						dispatch(addStateQueueToPlayer());
+					});
+				}
+			}
+		},
+		[dispatch, playerDestroyed],
 	);
 
 	useEffect(() => {
-		trackPlayerInit();
-	}, []);
-
-	useEffect(() => {
-		AppState.addEventListener('change', (state) => {
-			if (state === 'active') {
-				console.log('Activated!!!');
-			}
-		});
-	}, []);
+		AppState.addEventListener('change', appStateChangeHandler);
+		return () => {
+			AppState.removeEventListener('change', appStateChangeHandler);
+		};
+	}, [appStateChangeHandler]);
 
 	if (!isStoragePermissionGranted) {
 		return <NoPermissionsScreen />;

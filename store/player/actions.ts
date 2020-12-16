@@ -3,6 +3,7 @@ import {
 	PlayerActionTypes,
 	SetCurrentTrackAction,
 	SetIsPlayingAction,
+	SetPlayerDestroyedAction,
 	SetPlayerInitializedAction,
 	TogglePlayerParameter,
 } from './types';
@@ -10,6 +11,7 @@ import TrackPlayer from 'react-native-track-player';
 import Playable from '../../models/playable';
 import { getNextTrackInDirection } from '../../utils/trackPlayer/playerQueue';
 import { ThunkResult } from '../types';
+import { AppState } from 'react-native';
 
 export const setPlayerInitialized = (
 	initialized: boolean,
@@ -18,6 +20,33 @@ export const setPlayerInitialized = (
 	return {
 		type: PlayerActionTypes.SetPlayerInitialized,
 		payload: initialized,
+	};
+};
+export const setPlayerDestroyed = (destroyed: boolean): SetPlayerDestroyedAction => {
+	return {
+		type: PlayerActionTypes.SetPlayerDestroyed,
+		payload: destroyed,
+	};
+};
+
+export const stopPlayer = (): ThunkResult<
+	SetPlayerDestroyedAction | SetIsPlayingAction
+> => {
+	return async (dispatch, _getState) => {
+		const action = AppState.currentState === 'active' ? 'stop' : 'destroy';
+		try {
+			if (AppState.currentState === 'active') {
+				// await TrackPlayer.stop();
+				await TrackPlayer.seekTo(0);
+				await TrackPlayer.pause();
+			} else {
+				await TrackPlayer.destroy();
+				dispatch(setPlayerDestroyed(true));
+			}
+			dispatch(setPlayerIsPlaying(false));
+		} catch (err) {
+			console.log("Couldn't " + action + ' track player');
+		}
 	};
 };
 
@@ -31,17 +60,23 @@ export const playTrack = (
 				const isPlaying = getState().player.isPlaying;
 				if (isPlaying === false) {
 					await TrackPlayer.play();
-					dispatch(setIsPlaying(true));
+					dispatch(setPlayerIsPlaying(true));
 				}
 			}
 
-			dispatch({
-				type: PlayerActionTypes.SetCurrentTrack,
-				payload: track,
-			});
+			dispatch(setCurrentTrack(track));
 		} catch (err) {
 			throw err;
 		}
+	};
+};
+
+export const setCurrentTrack = (
+	track: PlayerActionPayload[PlayerActionTypes.SetCurrentTrack],
+): SetCurrentTrackAction => {
+	return {
+		type: PlayerActionTypes.SetCurrentTrack,
+		payload: track,
 	};
 };
 
@@ -51,11 +86,11 @@ export const togglePlay = (): ThunkResult<SetIsPlayingAction> => {
 			const isPlaying = getState().player.isPlaying;
 			if (isPlaying === true) {
 				await TrackPlayer.pause();
-				dispatch(setIsPlaying(false));
+				dispatch(setPlayerIsPlaying(false));
 				return;
 			}
 			await TrackPlayer.play();
-			dispatch(setIsPlaying(true));
+			dispatch(setPlayerIsPlaying(true));
 		} catch (err) {
 			throw err;
 		}
@@ -85,7 +120,7 @@ export const skipTrack = (
 	};
 };
 
-export const setIsPlaying = (isPlaying: boolean): SetIsPlayingAction => {
+export const setPlayerIsPlaying = (isPlaying: boolean): SetIsPlayingAction => {
 	return {
 		type: PlayerActionTypes.SetIsPlaying,
 		payload: isPlaying,

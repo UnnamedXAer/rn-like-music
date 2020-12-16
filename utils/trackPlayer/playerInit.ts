@@ -1,7 +1,16 @@
 import TrackPlayer, { Capability, RatingType } from 'react-native-track-player';
+import { setPlayerInitialized } from '../../store/player/actions';
+import store from '../../store/store';
 
 export const trackPlayerInit = async () => {
 	await TrackPlayer.setupPlayer();
+	await setPlayerOptions();
+
+	await store.dispatch<any>(setPlayerInitialized(true));
+	console.log('Player Initialization - Done!');
+};
+
+const setPlayerOptions = () =>
 	TrackPlayer.updateOptions({
 		// One of RATING_HEART, RATING_THUMBS_UP_DOWN, RATING_3_STARS, RATING_4_STARS, RATING_5_STARS, RATING_PERCENTAGE
 		ratingType: RatingType.Percentage,
@@ -37,4 +46,3 @@ export const trackPlayerInit = async () => {
 		// nextIcon: require('./next-icon.png'),
 		// icon: require('./notification-icon.png'), // The notification icon
 	});
-};

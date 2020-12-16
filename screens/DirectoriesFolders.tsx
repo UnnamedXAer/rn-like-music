@@ -102,6 +102,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			showToast(INTERNAL_ERROR_MSG, 'No dir selected by long press!');
 			return;
 		}
+
 		switch (option) {
 			case 'ADD_TO_QUEUE':
 			case 'PLAY': {

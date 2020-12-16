@@ -22,7 +22,7 @@
     -   [x] Skip songs
     -   [x] Play in loop
     -   [x] Play randomly
--   [ ] Add player notifications actions
+-   [X] Add player notifications actions
 -   [ ] Add Playlists UI
 -   [ ] Allow creating playlists
 -   [ ] Save playlists in device memory
@@ -36,5 +36,6 @@
 -   [ ] Clear code.
 -   [ ] Create the app icon
 -   [ ] Configure the release related settings like icons etc.
--	[ ] Add alert about the sound level, "Sound level is 0"
--	[ ] Show some information about sound output. 
+-	[ ] Show notification when user start playing with sounds turned off.
+-	[ ] Show some information about sound output (speaker / headphones...). 
+-	[ ] Go back in the directories tree on swipe.

@@ -18,14 +18,23 @@ const DirItemDialog: React.FC<Props> = ({ visible, onPressOutside, onItemPress }
 			title={'What to do?'}
 			content={
 				<>
-					<DialogItem onPress={() => onItemPress('PLAY')} title="Play" />
+					<DialogItem
+						onPress={() => onItemPress('PLAY')}
+						title="Play"
+						iconName="play-circle-outline"
+						iconVendor="MaterialIcons"
+					/>
 					<DialogItem
 						onPress={() => onItemPress('ADD_TO_QUEUE')}
 						title="Add to Queue"
+						iconName="queue-play-next"
+						iconVendor="MaterialIcons"
 					/>
 					<DialogItem
 						onPress={() => onItemPress('SHOW_INFO')}
 						title="Show file details"
+						iconName="info-outline"
+						iconVendor="MaterialIcons"
 					/>
 				</>
 			}

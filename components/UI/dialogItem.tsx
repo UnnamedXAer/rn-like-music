@@ -47,8 +47,8 @@ const DialogItem: React.FC<Props> = ({ onPress, title, iconName, iconVendor }) =
 	return (
 		<TouchableHighlight
 			onPress={onPress}
-			activeOpacity={0.8}
-			underlayColor={Colors[colorScheme].background}>
+			activeOpacity={0.9}
+			underlayColor={Colors[colorScheme].touchHighlight}>
 			<View style={styles.content}>
 				{icon}
 				<Text>{title}</Text>
@@ -60,6 +60,7 @@ const DialogItem: React.FC<Props> = ({ onPress, title, iconName, iconVendor }) =
 const styles = StyleSheet.create({
 	content: {
 		paddingVertical: Layout.spacing(),
+		marginHorizontal: Layout.spacing(),
 		flexDirection: 'row',
 		alignItems: 'center',
 	},

@@ -21,17 +21,20 @@ const QueueSongMenu: React.FC<Props> = ({ visible, onPressOutside, onItemPress }
 					<DialogItem
 						onPress={() => onItemPress('PLAY')}
 						title="Play"
-						iconName="play"
+						iconName="play-circle-outline"
+						iconVendor="MaterialIcons"
 					/>
 					<DialogItem
 						onPress={() => onItemPress('REMOVE_FROM_QUEUE')}
 						title="Remove from queue"
-						iconName="minus"
+						iconName="remove-from-queue"
+						iconVendor="MaterialIcons"
 					/>
 					<DialogItem
 						onPress={() => onItemPress('SHOW_INFO')}
 						title="Show file details"
-						iconName="info-circle"
+						iconName="info-outline"
+						iconVendor="MaterialIcons"
 					/>
 				</>
 			}

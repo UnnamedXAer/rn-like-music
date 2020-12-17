@@ -1,15 +1,12 @@
 import { ColorSchemeName } from '../hooks/useColorScheme';
 
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
-
 const _colors = {
 	lighter: '#EFF8E2',
 	light: '#CECFC7',
 	normal: '#ADA8B6',
 	dark: '#573280',
 	darker: '#23022E',
-	placeholder: '#2f95dc', //'#ccc',
+	placeholder: '#2f95dc',
 	disabled: '#666',
 	error: '#d00000',
 	warning: '#ffba08',
@@ -19,7 +16,7 @@ const _colors = {
 export type ThemeColors = {
 	text: string;
 	background: string;
-	tint: string;
+	touchHighlight: string;
 };
 
 type AppColors = { [key in ColorSchemeName]: ThemeColors } & { colors: typeof _colors };
@@ -28,12 +25,12 @@ const Colors: AppColors = {
 	light: {
 		text: _colors.dark,
 		background: _colors.lighter,
-		tint: tintColorLight,
+		touchHighlight: _colors.light,
 	},
 	dark: {
 		text: _colors.light,
 		background: _colors.darker,
-		tint: tintColorDark,
+		touchHighlight: _colors.dark,
 	},
 	colors: _colors,
 };

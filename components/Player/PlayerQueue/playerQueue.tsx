@@ -10,6 +10,7 @@ import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import Colors from '../../../constants/Colors';
 import Layout from '../../../constants/Layout';
 import Dir from '../../../models/dir';
+import MenuVerticalButton from '../../UI/menuVerticalButton';
 import Separator from '../../UI/Separator';
 import { Text as ThemedText } from '../../UI/Themed';
 
@@ -35,27 +36,33 @@ const PlayerQueue: React.FC<Props> = ({
 	) : (
 		<View style={styles.container}>
 			{queue.length > 0 ? (
+				// @refactor
 				<ScrollView style={styles.list}>
 					{queue.map((dir) => {
 						return (
 							<React.Fragment key={dir.path}>
-								<TouchableOpacity
-									onPress={() => onSongPress(dir)}
-									onLongPress={() => onSongLongPress(dir)}
-									style={styles.trackContainer}>
-									<ThemedText
-										style={[
-											styles.trackTitle,
-											{
-												fontWeight:
-													dir.path === currentTrackPath
-														? '700'
-														: 'normal',
-											},
-										]}>
-										{dir.name}
-									</ThemedText>
-								</TouchableOpacity>
+								<View style={styles.listItem}>
+									<TouchableOpacity
+										onPress={() => onSongPress(dir)}
+										onLongPress={() => onSongLongPress(dir)}
+										style={styles.touchable}>
+										<ThemedText
+											style={[
+												styles.trackTitle,
+												{
+													fontWeight:
+														dir.path === currentTrackPath
+															? '700'
+															: 'normal',
+												},
+											]}>
+											{dir.name}
+										</ThemedText>
+									</TouchableOpacity>
+									<MenuVerticalButton
+										onPress={() => onSongLongPress(dir)}
+									/>
+								</View>
 								<Separator separatorStyle={styles.songSeparator} />
 							</React.Fragment>
 						);
@@ -94,14 +101,20 @@ const styles = StyleSheet.create({
 		marginVertical: Layout.spacing(0.5),
 		fontSize: 12,
 	},
-	trackContainer: {
-		flexDirection: 'column',
-		marginHorizontal: Layout.spacing(
+	listItem: {
+		flex: 1,
+		flexDirection: 'row',
+	},
+	touchable: {
+		flex: 1,
+		flexDirection: 'row',
+		marginLeft: Layout.spacing(
 			Layout.deviceSize === 'medium' ? 1.5 : Layout.deviceSize === 'tablet' ? 3 : 1,
 		),
-		marginVertical: Layout.spacing(0.5),
 	},
 	trackTitle: {
+		paddingVertical: Layout.spacing(1),
+		flex: 1,
 		fontSize: Layout.deviceSize === 'tablet' ? 20 : 14,
 	},
 	songSeparator: {

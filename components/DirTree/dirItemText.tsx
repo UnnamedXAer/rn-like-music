@@ -39,6 +39,7 @@ export default DirItemText;
 
 const styles = StyleSheet.create({
 	touchable: {
+		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
 	},

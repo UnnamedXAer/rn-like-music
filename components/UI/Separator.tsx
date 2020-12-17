@@ -22,9 +22,9 @@ export default function Separator({
 
 const styles = StyleSheet.create({
 	separator: {
-		marginVertical: 4,
+		// marginVertical: 4,
 		height: 1,
-		width: '90%',
-		opacity: 0.5,
+		width: '80%',
+		opacity: 0.3,
 	},
 });

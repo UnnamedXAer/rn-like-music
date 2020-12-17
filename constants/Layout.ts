@@ -14,9 +14,9 @@ const Layout = {
 	baseRadius: 4,
 	spacing: (x = 1) => x * 8,
 };
-// (async () => {
-// 	console.log('Device:', await DeviceInfo.getDeviceName());
-// 	console.log('Layout', Layout);
-// })();
+(async () => {
+	// console.log('Device:', await DeviceInfo.getDeviceName());
+	console.log('Layout', Layout);
+})();
 
 export default Layout;

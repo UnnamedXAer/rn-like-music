@@ -15,6 +15,7 @@ export default function RootStackNavigator() {
 	const colorScheme = useColorScheme();
 	return (
 		<RootStack.Navigator
+			// initialRouteName="Directories"
 			screenOptions={{
 				headerTintColor: Colors[colorScheme].text,
 				headerBackground: (props) => (

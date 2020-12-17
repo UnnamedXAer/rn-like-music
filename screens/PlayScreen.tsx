@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/types';
 import Playable from '../models/playable';
 import * as PlayerActions from '../store/player/actions';
+import * as QueueActions from '../store/queue/actions';
 import { PlayNavigationProp } from '../navigation/types/PlayerScreenNavigatorTypes';
 
 type PlayScreenRouteProp = RouteProp<RootStackParamList, 'Play'>;
@@ -87,27 +88,12 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					break;
 				case 'REMOVE_FROM_QUEUE':
 					try {
-						// 	const tract = await TrackPlayer.getTrack(longPressedSong.path);
-						// 	if (tract.id === tracksState.currentTrack?.path) {
-						// 		await TrackPlayer.stop();
-						// 		if (tracksState.nextTrack) {
-						// 			await TrackPlayer.skip(tracksState.nextTrack?.path);
-						// 		}
-						// 	}
-						// 	console.log('about to remove track: ', tract);
-						// 	await TrackPlayer.remove([(tract.id as unknown) as Track]);
-						// 	dispatchTracks({
-						// 		type: TracksActionTypes.UpdateQueue,
-						// 		payload: {
-						// 			remove: [longPressedSong.path],
-						// 		},
-						// 	});
+						await dispatch(
+							QueueActions.removeQueueTrack(longPressedSong.path),
+						);
 						showToast('track removed', longPressedSong.name);
 					} catch (err) {
-						showToast(
-							'Fail to remove track: ' + longPressedSong.name,
-							err.message,
-						);
+						showToast('Sorry, could not remove the track.', err.message);
 					}
 					break;
 				case 'SHOW_INFO':

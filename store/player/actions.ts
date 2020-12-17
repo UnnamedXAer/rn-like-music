@@ -66,6 +66,7 @@ export const playTrack = (
 
 			dispatch(setCurrentTrack(track));
 		} catch (err) {
+			// @todo: remove track from state if play action fails.
 			throw err;
 		}
 	};

@@ -2,6 +2,7 @@ import Playable from '../../models/playable';
 
 export enum QueueActionTypes {
 	SetTracks = 'QUEUE_SET_TRACKS',
+	RemoveTrack = 'QUEUE_REMOVE_TRACK',
 }
 
 export interface QueueStoreState {
@@ -12,9 +13,9 @@ export type QueueActionPayload = {
 	[QueueActionTypes.SetTracks]: QueueStoreState['tracks'];
 };
 
-export interface QueueSetTracks {
+export interface QueueSetTracksAction {
 	type: QueueActionTypes.SetTracks;
 	payload: QueueActionPayload[typeof QueueActionTypes.SetTracks];
 }
 
-export type QueueActions = QueueSetTracks;
+export type QueueActions = QueueSetTracksAction;

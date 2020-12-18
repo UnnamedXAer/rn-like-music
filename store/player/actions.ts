@@ -54,13 +54,20 @@ export const playTrack = (
 	track: Playable | null,
 ): ThunkResult<SetCurrentTrackAction | SetIsPlayingAction> => {
 	return async (dispatch, getState) => {
+		const isPlaying = getState().player.isPlaying;
 		try {
 			if (track !== null) {
 				await TrackPlayer.skip(track.path);
-				const isPlaying = getState().player.isPlaying;
+
 				if (isPlaying === false) {
 					await TrackPlayer.play();
 					dispatch(setPlayerIsPlaying(true));
+				}
+			} else {
+				if (isPlaying === true) {
+					// @thought: need to test with "stop"
+					await TrackPlayer.pause();
+					dispatch(setPlayerIsPlaying(false));
 				}
 			}
 

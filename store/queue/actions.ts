@@ -72,39 +72,46 @@ export const addStateQueueToPlayer = (): ThunkResult<
 	};
 };
 
+// @refactor
 export const removeQueueTrack = (
 	trackPath: Playable['path'],
-): ThunkResult<QueueSetTracksAction> => {
+): ThunkResult<QueueSetTracksAction | SetCurrentTrackAction> => {
 	return async (dispatch, getState) => {
 		const {
 			queue: { tracks },
-			player: { currentTrack },
+			player: { currentTrack, isPlaying },
 		} = getState();
 
 		const updatedTracks = tracks.filter((track) => track.path !== trackPath);
 
-		try {
-			if (currentTrack?.path === trackPath) {
-				if (updatedTracks.length === 0) {
-					await TrackPlayer.stop();
-				} else {
-					await dispatch(PlayerActions.skipTrack('next'));
-				}
-			}
-			// @todo: what if I try to remove track not in queue, will it fail?
-			console.log(await TrackPlayer.getCurrentTrack());
-			console.log(await TrackPlayer.getQueue());
-			// const _track = await TrackPlayer.getTrack(trackPath);
-			await TrackPlayer.remove((trackPath as unknown) as Track);
-			console.log(await TrackPlayer.getQueue());
-			dispatch({
-				type: QueueActionTypes.SetTracks,
-				payload: updatedTracks,
-			});
-		} catch (err) {
-			// @todo: test it, probably state should be cleaned
+		// @info: the app crashes when try to delete track with two tracks in queue.
+		// @i: if this bug didn't exist we would use [stop+ skip] as workaround because
+		// @i: the player does not delete track if that track is currently played.
+		if (updatedTracks.length < 2) {
+			const position = await TrackPlayer.getPosition();
 			await TrackPlayer.reset();
-			throw err;
+			if (updatedTracks.length > 0) {
+				await TrackPlayer.add(await mapPlayableToTracks(updatedTracks));
+				if (currentTrack?.path === trackPath) {
+					await dispatch(PlayerActions.skipTrack('next'));
+				} else {
+					await TrackPlayer.seekTo(position);
+				}
+				if (isPlaying) {
+					await TrackPlayer.play();
+				}
+			} else {
+				await dispatch(PlayerActions.playTrack(null));
+			}
+		} else {
+			if (currentTrack?.path === trackPath) {
+				await dispatch(PlayerActions.skipTrack('next'));
+			}
+			await TrackPlayer.remove((trackPath as unknown) as Track);
 		}
+		dispatch({
+			type: QueueActionTypes.SetTracks,
+			payload: updatedTracks,
+		});
 	};
 };

@@ -30,6 +30,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/types';
 import { DirectoriesActionTypes } from '../store/directories/types';
 import { setQueueTracks } from '../store/queue/actions';
+import { DirStat } from '../models/dirStat';
+import DirInfoDialog from '../components/dirInfoDialog';
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Directories'>;
 
@@ -43,6 +45,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		[path: string]: Dir;
 	}>({});
 	const [queueUpdateInProgress, setQueueUpdateInProgress] = useState(false);
+	const [dirInfo, setDirInfo] = useState<DirStat | null>(null);
 	const [longPressedDir, setLongPressedDir] = useState<Dir | null>(null);
 	const directoriesState = useSelector((rootState: RootState) => rootState.directories);
 	const dispatch = useDispatch();
@@ -128,8 +131,8 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			}
 			case 'SHOW_INFO': {
 				setLongPressedDir(null);
-				const info = await getDirInfo(longPressedDir.path);
-				console.log('info', info);
+				const info = await getDirInfo(longPressedDir);
+				setDirInfo(info);
 				break;
 			}
 			default:
@@ -227,6 +230,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 					/>
 				)}
 			/>
+			<DirInfoDialog info={dirInfo} onDismiss={() => setDirInfo(null)} />
 			<DirItemDialog
 				visible={longPressedDir !== null}
 				onPressOutside={() => setLongPressedDir(null)}

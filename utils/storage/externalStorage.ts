@@ -1,5 +1,6 @@
 import RNFS from 'react-native-fs';
 import Dir from '../../models/dir';
+import { DirStat } from '../../models/dirStat';
 import Playable from '../../models/playable';
 import showToast from '../showToast';
 import { isFilePlayable } from './isFilePlayable';
@@ -107,10 +108,17 @@ export const getMainDirsAndPrettyPrefixes = async () => {
 	return { mainDirs, prettyPathPrefixes };
 };
 
-export const getDirInfo = async (path: string) => {
-	const dirStat = await RNFS.readFileAssets('file://' + path, {});
-	console.log('Dir Info => ', dirStat);
-	return '';
+export const getDirInfo = async (dir: Dir | Playable) => {
+	console.log('path', dir.path);
+	const statResult = await RNFS.stat('file://' + dir.path);
+	const dirStat = new DirStat(
+		dir.path,
+		dir.prettyPath,
+		dir.name,
+		dir instanceof Playable ? 'file' : 'folder',
+		+statResult.size,
+	);
+	return dirStat;
 };
 
 export const readStorage = async (path: string) => {

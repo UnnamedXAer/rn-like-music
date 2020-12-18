@@ -24,6 +24,8 @@ import Playable from '../models/playable';
 import * as PlayerActions from '../store/player/actions';
 import * as QueueActions from '../store/queue/actions';
 import { PlayNavigationProp } from '../navigation/types/PlayerScreenNavigatorTypes';
+import DirInfoDialog from '../components/dirInfoDialog';
+import { DirStat } from '../models/dirStat';
 
 type PlayScreenRouteProp = RouteProp<RootStackParamList, 'Play'>;
 interface Props {
@@ -32,6 +34,7 @@ interface Props {
 }
 
 const PlayScreen: React.FC<Props> = ({ navigation }) => {
+	const [dirInfo, setDirInfo] = useState<DirStat | null>(null);
 	const {
 		isPlaying,
 		currentTrack,
@@ -97,8 +100,8 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					}
 					break;
 				case 'SHOW_INFO':
-					const info = await getDirInfo(longPressedSong.path);
-					Alert.alert(JSON.stringify(info, null, '\t'));
+					const info = await getDirInfo(longPressedSong);
+					setDirInfo(info);
 					break;
 				default:
 					assertUnreachable(option);
@@ -155,6 +158,7 @@ const PlayScreen: React.FC<Props> = ({ navigation }) => {
 					additionalPlayerPropAction={additionalPlayerPropActionHandler}
 				/>
 			</ThemedView>
+			<DirInfoDialog info={dirInfo} onDismiss={() => setDirInfo(null)} />
 			<QueueSongMenu
 				onItemPress={queueMenuItemPressHandler}
 				onPressOutside={() => setLongPressedSong(null)}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet } from 'react-native';
 import TrackPlayer from 'react-native-track-player';
 import { RootStackParamList } from '../navigation/types/RootStackNavigatorTypes';
 import { View as ThemedView } from '../components/UI/Themed';

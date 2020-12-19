@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
 	notTracksContainer: {
 		flex: 1,
 		height: '100%',
-		backgroundColor: 'green',
 		justifyContent: 'center',
 		alignItems: 'center',
 	},

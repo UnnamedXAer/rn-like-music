@@ -2,7 +2,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View } from 'react-native';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
-import TrackPlayer from 'react-native-track-player';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import PlayScreen from '../screens/PlayScreen';
@@ -33,18 +32,18 @@ export default function RootStackNavigator() {
 				component={PlayScreen}
 				options={({ navigation }) => ({
 					// TODO - remove after fix the tracks state
-					headerLeft: (props) => {
-						return (
-							<FontAwesome5Icon.Button
-								color={props.tintColor}
-								name="satellite-dish"
-								backgroundColor="transparent"
-								activeOpacity={0.4}
-								underlayColor={Colors[colorScheme].background}
-								onPress={() => TrackPlayer.getQueue().then(console.log)}
-							/>
-						);
-					},
+					// headerLeft: (props) => {
+					// 	return (
+					// 		<FontAwesome5Icon.Button
+					// 			color={props.tintColor}
+					// 			name="satellite-dish"
+					// 			backgroundColor="transparent"
+					// 			activeOpacity={0.4}
+					// 			underlayColor={Colors[colorScheme].background}
+					// 			onPress={() => TrackPlayer.getQueue().then(console.log)}
+					// 		/>
+					// 	);
+					// },
 					headerRight: (props) => {
 						return (
 							<FontAwesome5Icon.Button

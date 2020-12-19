@@ -180,7 +180,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 
 	return (
 		<ThemedView style={styles.container}>
-			<Button
+			{/* <Button
 				onPress={() => {
 					dispatch({
 						type: DirectoriesActionTypes.ResetState,
@@ -189,13 +189,7 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 				size="small"
 				mode="contained"
 				title="RESET"
-			/>
-			<Text
-				style={{ color: 'green', backgroundColor: 'lightyellow' }}
-				numberOfLines={3}>
-				{directoriesState.currentPath}
-			</Text>
-
+			/> */}
 			<View style={styles.headerContainer}>
 				<ThemedText style={styles.flatListTitle}>Music</ThemedText>
 				<Button

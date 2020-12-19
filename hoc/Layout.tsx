@@ -43,7 +43,7 @@ const Layout: React.FC = () => {
 		};
 	}, [appStateChangeHandler]);
 
-	if (!isStoragePermissionGranted) {
+	if (isStoragePermissionGranted === false) {
 		return <NoPermissionsScreen />;
 	}
 

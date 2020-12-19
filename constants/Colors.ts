@@ -17,6 +17,7 @@ export type ThemeColors = {
 	text: string;
 	background: string;
 	touchHighlight: string;
+	statusBarColor: string;
 };
 
 type AppColors = { [key in ColorSchemeName]: ThemeColors } & { colors: typeof _colors };
@@ -26,11 +27,13 @@ const Colors: AppColors = {
 		text: _colors.dark,
 		background: _colors.lighter,
 		touchHighlight: _colors.light,
+		statusBarColor: _colors.dark,
 	},
 	dark: {
 		text: _colors.light,
 		background: _colors.darker,
 		touchHighlight: _colors.dark,
+		statusBarColor: _colors.darker,
 	},
 	colors: _colors,
 };

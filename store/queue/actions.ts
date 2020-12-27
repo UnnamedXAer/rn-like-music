@@ -14,7 +14,7 @@ export const setQueueTracks = (
 		let currentTracks: QueueStoreState['tracks'] = [...newTracks];
 
 		if (resetQueue === false) {
-			currentTracks = currentTracks.concat(getState().queue.tracks);
+			currentTracks = getState().queue.tracks.concat(currentTracks);
 		}
 
 		try {

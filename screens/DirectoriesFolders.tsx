@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-	View,
-	Text,
-	FlatList,
-	StyleSheet,
-	ActivityIndicator,
-	BackHandler,
-} from 'react-native';
+import { View, FlatList, StyleSheet, ActivityIndicator, BackHandler } from 'react-native';
 import DirRenderItem from '../components/DirTree/dirTreeRenderItem';
 import Dir from '../models/dir';
 import { View as ThemedView, Text as ThemedText } from '../components/UI/Themed';
@@ -159,10 +152,10 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 		}
 	};
 
-	const updateQueueHandler = () => {
+	const updateQueueHandler = (resetQueue: boolean) => {
 		setQueueUpdateInProgress(true);
 		const songs = Object.values(selectedFiles);
-		addTracksToQueue(songs, true, {
+		addTracksToQueue(songs, resetQueue, {
 			message: 'You did not choose any songs to play.',
 			devMessage: '"selectedFiles" object is empty.',
 		});
@@ -192,12 +185,20 @@ const DirectoriesFolders: React.FC<Props> = ({ navigation }) => {
 			/> */}
 			<View style={styles.headerContainer}>
 				<ThemedText style={styles.flatListTitle}>Music</ThemedText>
-				<Button
-					onPress={updateQueueHandler}
-					title="Play it"
-					size={'small'}
-					loading={queueUpdateInProgress}
-				/>
+				<View style={{ flexDirection: 'row' }}>
+					<Button
+						onPress={() => updateQueueHandler(false)}
+						title="Add to Q"
+						size={'small'}
+						loading={queueUpdateInProgress}
+					/>
+					<Button
+						onPress={() => updateQueueHandler(true)}
+						title="Play it"
+						size={'small'}
+						loading={queueUpdateInProgress}
+					/>
+				</View>
 			</View>
 			<FlatList
 				ListEmptyComponent={

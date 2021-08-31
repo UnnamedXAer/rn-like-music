@@ -9,17 +9,18 @@ import { SetCurrentTrackAction, SetPlayerDestroyedAction } from '../player/types
 export const setQueueTracks = (
 	newTracks: Playable[],
 	resetQueue: boolean,
-): ThunkResult<QueueSetTracksAction> => {
+): ThunkResult<QueueSetTracksAction | SetCurrentTrackAction> => {
 	return async (dispatch, getState) => {
-		let currentTracks: QueueStoreState['tracks'] = [...newTracks];
+		let updatedTracks: QueueStoreState['tracks'] = [...newTracks];
 
 		if (resetQueue === false) {
-			currentTracks = getState().queue.tracks.concat(currentTracks);
+			updatedTracks = getState().queue.tracks.concat(updatedTracks);
 		}
 
 		try {
 			if (resetQueue) {
 				await TrackPlayer.reset();
+				dispatch(PlayerActions.setCurrentTrack(null));
 			}
 			const tracks = await mapPlayableToTracks(newTracks);
 			await TrackPlayer.add(tracks);
@@ -28,7 +29,7 @@ export const setQueueTracks = (
 
 			dispatch({
 				type: QueueActionTypes.SetTracks,
-				payload: currentTracks,
+				payload: updatedTracks,
 			});
 		} catch (err) {
 			// @todo: test it, probably state should be cleaned

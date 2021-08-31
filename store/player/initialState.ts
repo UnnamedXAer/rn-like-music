@@ -2,9 +2,9 @@ import { PlayerStoreState } from './types';
 
 export const playerInitialState: PlayerStoreState = {
 	initialized: false,
-	destroyed: false,
+	destroyed: true,
 	currentTrack: null,
 	isPlaying: false,
 	random: false,
-	repeat: false,
+	repeat: true,
 };

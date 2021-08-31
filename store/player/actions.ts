@@ -113,6 +113,11 @@ export const skipTrack = (
 			queue: { tracks },
 			player: { currentTrack, random },
 		} = getState();
+
+		if (tracks.length === 0) {
+			return;
+		}
+
 		try {
 			const track = getNextTrackInDirection(
 				direction,
